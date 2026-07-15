@@ -37,9 +37,14 @@ export default function AIAssistant({ open, onClose, chapter, lesson }) {
   const [sources, setSources] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [configured, setConfigured] = useState(false);
   const controllerRef = useRef(null);
   const endRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setConfigured(isAssistantConfigured());
+  }, []);
 
   useEffect(() => {
     try {
@@ -141,7 +146,7 @@ export default function AIAssistant({ open, onClose, chapter, lesson }) {
         <div><button type="button" onClick={clearConversation} aria-label="清空对话">清空</button><button type="button" onClick={onClose} aria-label="关闭 AI 助教">×</button></div>
       </header>
       <div className="ai-context">
-        <i></i><span>{chapter ? `${chapter.track.name} · ${chapter.no}` : "全局学习路线"}</span><em>{isAssistantConfigured() ? "AI ONLINE" : "WAITING FOR API"}</em>
+        <i></i><span>{chapter ? `${chapter.track.name} · ${chapter.no}` : "全局学习路线"}</span><em>{configured ? "AI ONLINE" : "WAITING FOR API"}</em>
       </div>
       <div className="ai-messages" aria-live="polite">
         {!messages.length && (
