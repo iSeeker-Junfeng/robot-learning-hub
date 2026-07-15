@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { chapterById, chapterGuides, graphEdges, graphNodes, tracks } from "./data";
+import { chapterById, chapterGuides, chapterLessons, graphEdges, graphNodes, tracks } from "./data";
 
 const STORAGE_KEY = "robot-learning-hub-progress-v1";
+const STUDY_KEY = "robot-learning-hub-study-checks-v1";
 const stateLabels = ["未开始", "学习中", "已掌握"];
 
 function ArrowIcon() {
@@ -39,6 +40,7 @@ function StatusButton({ value = 0, onChange, compact = false }) {
 export default function Home() {
   const [activeTrack, setActiveTrack] = useState("ros2");
   const [progress, setProgress] = useState({});
+  const [studyChecks, setStudyChecks] = useState({});
   const [query, setQuery] = useState("");
   const [graphFilter, setGraphFilter] = useState("all");
   const [focusedNode, setFocusedNode] = useState("kin-transform");
@@ -50,6 +52,8 @@ export default function Home() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) setProgress(JSON.parse(stored));
+      const storedChecks = localStorage.getItem(STUDY_KEY);
+      if (storedChecks) setStudyChecks(JSON.parse(storedChecks));
     } catch (_) {}
   }, []);
 
@@ -58,6 +62,12 @@ export default function Home() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
     } catch (_) {}
   }, [progress]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STUDY_KEY, JSON.stringify(studyChecks));
+    } catch (_) {}
+  }, [studyChecks]);
 
   useEffect(() => {
     if (!selectedChapter) return undefined;
@@ -85,13 +95,18 @@ export default function Home() {
     setProgress((current) => ({ ...current, [id]: ((current[id] || 0) + 1) % 3 }));
   }
 
+  function toggleStudyStep(chapterId, index) {
+    const key = `${chapterId}:${index}`;
+    setStudyChecks((current) => ({ ...current, [key]: !current[key] }));
+  }
+
   function jumpToTrack(id) {
     setActiveTrack(id);
     document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function exportProgress() {
-    const payload = { version: 1, exportedAt: new Date().toISOString(), progress };
+    const payload = { version: 2, exportedAt: new Date().toISOString(), progress, studyChecks };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
@@ -112,6 +127,7 @@ export default function Home() {
         const next = payload.progress || payload;
         if (!next || typeof next !== "object") throw new Error("invalid");
         setProgress(next);
+        if (payload.studyChecks && typeof payload.studyChecks === "object") setStudyChecks(payload.studyChecks);
         setNotice("进度已恢复");
       } catch (_) {
         setNotice("无法识别这个进度文件");
@@ -125,6 +141,10 @@ export default function Home() {
   const focused = chapterById[focusedNode];
   const selected = selectedChapter ? chapterById[selectedChapter] : null;
   const selectedGuide = selectedChapter ? chapterGuides[selectedChapter] : null;
+  const selectedLesson = selectedChapter ? chapterLessons[selectedChapter] : null;
+  const selectedStepCount = selectedChapter && selectedGuide
+    ? selectedGuide.materials.filter((_, index) => studyChecks[`${selectedChapter}:${index}`]).length
+    : 0;
   const filteredNodes = graphNodes.filter((node) => graphFilter === "all" || node.track === graphFilter);
   const visibleIds = new Set(filteredNodes.map((node) => node.id));
   const nodeMap = Object.fromEntries(graphNodes.map((node) => [node.id, node]));
@@ -336,7 +356,7 @@ export default function Home() {
         </div>
       </section>
 
-      {selected && selectedGuide && (
+      {selected && selectedGuide && selectedLesson && (
         <div className="chapter-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedChapter(null); }}>
           <section className="chapter-sheet" role="dialog" aria-modal="true" aria-labelledby="chapter-sheet-title" style={{ "--track": selected.track.color }}>
             <div className="sheet-head">
@@ -344,18 +364,44 @@ export default function Home() {
               <button type="button" className="sheet-close" onClick={() => setSelectedChapter(null)} aria-label="关闭章节详情">×</button>
             </div>
             <p className="sheet-intro">{selected.desc}</p>
+            <div className="learning-goal">
+              <span>学完你应该能够</span>
+              <p>{selectedLesson.goal}</p>
+            </div>
+            <div className="lesson-progress">
+              <div><span>本章学习进度</span><strong>{selectedStepCount}/{selectedGuide.materials.length}</strong></div>
+              <div className="lesson-progress-bar"><i style={{ width: `${(selectedStepCount / selectedGuide.materials.length) * 100}%` }}></i></div>
+            </div>
             <div className="sheet-grid">
-              <article>
-                <span className="sheet-index">01 / 学习重点</span>
-                <ul>{selectedGuide.materials.map((item) => <li key={item}>{item}</li>)}</ul>
+              <article className="lesson-card">
+                <span className="sheet-index">01 / 分步学习</span>
+                <div className="lesson-units">
+                  {selectedGuide.materials.map((item, index) => {
+                    const checked = Boolean(studyChecks[`${selected.id}:${index}`]);
+                    return (
+                      <button type="button" className={checked ? "complete" : ""} key={item} onClick={() => toggleStudyStep(selected.id, index)}>
+                        <span className="lesson-check">{checked ? "✓" : String(index + 1).padStart(2, "0")}</span>
+                        <span><strong>{item}</strong><small>{selectedLesson.details[index]}</small></span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </article>
+              <article className="pitfall-card">
+                <span className="sheet-index">02 / 常见误区</span>
+                <ul>{selectedLesson.pitfalls.map((item) => <li key={item}>{item}</li>)}</ul>
               </article>
               <article className="project-card">
-                <span className="sheet-index">02 / 工程练习</span>
+                <span className="sheet-index">03 / 工程练习</span>
                 <p>{selectedGuide.project}</p>
               </article>
               <article>
-                <span className="sheet-index">03 / 验收标准</span>
+                <span className="sheet-index">04 / 验收标准</span>
                 <ul className="acceptance-list">{selectedGuide.acceptance.map((item) => <li key={item}><i>✓</i><span>{item}</span></li>)}</ul>
+              </article>
+              <article className="quiz-card">
+                <span className="sheet-index">05 / 学完自测</span>
+                <ol>{selectedLesson.quiz.map((item, index) => <li key={item}><span>Q{index + 1}</span><p>{item}</p></li>)}</ol>
               </article>
             </div>
             <div className="sheet-footer">

@@ -188,13 +188,21 @@ a { color: inherit; text-decoration: none; }
 .detail-route:hover { filter: brightness(1.12); }
 
 .chapter-modal { position: fixed; z-index: 60; inset: 0; background: rgba(8, 10, 14, .72); backdrop-filter: blur(10px); display: flex; justify-content: flex-end; animation: modal-fade .2s ease; }
-.chapter-sheet { --track: var(--cyan); width: min(720px, 92vw); height: 100%; overflow-y: auto; background: var(--paper); color: var(--ink); padding: clamp(28px, 5vw, 66px); box-shadow: -30px 0 90px rgba(0,0,0,.3); animation: sheet-in .32s ease; }
+.chapter-sheet { --track: var(--cyan); width: min(780px, 94vw); height: 100%; overflow-y: auto; background: var(--paper); color: var(--ink); padding: clamp(28px, 5vw, 66px); box-shadow: -30px 0 90px rgba(0,0,0,.3); animation: sheet-in .32s ease; }
 .sheet-head { display: flex; justify-content: space-between; gap: 25px; align-items: flex-start; padding-bottom: 25px; border-bottom: 1px solid var(--line); }
 .sheet-head > div > span, .sheet-index { font: 500 10px "DM Mono", monospace; letter-spacing: .14em; color: var(--track); }
 .sheet-head h2 { margin: 10px 0 0; font-size: clamp(34px, 5vw, 58px); line-height: 1.08; letter-spacing: -.055em; }
 .sheet-close { flex: 0 0 auto; width: 42px; height: 42px; border: 1px solid var(--line); background: transparent; font: 300 27px/1 "DM Mono", monospace; cursor: pointer; }
 .sheet-close:hover { background: var(--ink); color: white; }
 .sheet-intro { color: var(--muted); line-height: 1.8; margin: 22px 0 34px; }
+.learning-goal { border-left: 4px solid var(--track); background: white; padding: 20px 22px; margin-bottom: 18px; }
+.learning-goal span { font: 500 9px "DM Mono", monospace; letter-spacing: .14em; color: var(--track); }
+.learning-goal p { margin: 8px 0 0; font-size: 16px; font-weight: 700; line-height: 1.7; }
+.lesson-progress { padding: 16px 0 26px; }
+.lesson-progress > div:first-child { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #888; }
+.lesson-progress strong { font: 500 13px "DM Mono", monospace; color: var(--ink); }
+.lesson-progress-bar { height: 4px; background: rgba(17,19,25,.1); margin-top: 9px; overflow: hidden; }
+.lesson-progress-bar i { display: block; height: 100%; background: var(--track); transition: width .25s ease; }
 .sheet-grid { display: grid; gap: 12px; }
 .sheet-grid article { border: 1px solid var(--line); padding: 24px; background: rgba(255,255,255,.38); }
 .sheet-grid ul { list-style: none; padding: 0; margin: 19px 0 0; display: grid; gap: 12px; }
@@ -202,8 +210,26 @@ a { color: inherit; text-decoration: none; }
 .sheet-grid article:not(.project-card) > ul:not(.acceptance-list) li::before { content: ""; position: absolute; left: 0; top: .72em; width: 6px; height: 2px; background: var(--track); }
 .project-card { background: var(--ink) !important; color: white; border-color: var(--ink) !important; }
 .project-card p { font-size: 16px; line-height: 1.8; margin: 20px 0 0; }
+.lesson-card { padding-bottom: 8px !important; }
+.lesson-units { margin-top: 17px; }
+.lesson-units button { width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 18px 0; display: grid; grid-template-columns: 36px 1fr; gap: 13px; text-align: left; cursor: pointer; }
+.lesson-units button:hover { background: rgba(255,255,255,.6); padding-left: 8px; padding-right: 8px; }
+.lesson-units button.complete { opacity: .62; }
+.lesson-units button.complete strong { text-decoration: line-through; }
+.lesson-check { width: 30px; height: 30px; border: 1px solid var(--track); color: var(--track); display: grid; place-items: center; font: 500 9px "DM Mono", monospace; }
+.lesson-units button.complete .lesson-check { background: var(--track); color: var(--ink); }
+.lesson-units strong { display: block; font-size: 14px; }
+.lesson-units small { display: block; color: #777; font-size: 12px; line-height: 1.75; margin-top: 7px; }
+.pitfall-card { background: #fff4ee !important; }
+.pitfall-card ul { counter-reset: pitfall; }
+.pitfall-card li { padding-left: 30px !important; color: #794836; }
+.pitfall-card li::before { counter-increment: pitfall; content: "!" !important; width: 20px !important; height: 20px !important; top: .15em !important; background: var(--orange) !important; color: white; display: grid; place-items: center; font: 700 10px "DM Mono", monospace; }
 .acceptance-list li { display: grid; grid-template-columns: 23px 1fr; gap: 10px; align-items: start; font-size: 13px; line-height: 1.6; }
 .acceptance-list i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: var(--track); color: var(--ink); display: grid; place-items: center; font-size: 10px; }
+.quiz-card ol { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+.quiz-card li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+.quiz-card li > span { font: 500 10px "DM Mono", monospace; color: var(--track); }
+.quiz-card li p { margin: 0; font-size: 13px; line-height: 1.65; }
 .sheet-footer { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: stretch; }
 .sheet-footer > div { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
 .sheet-footer > div span { color: #999; font-size: 9px; }
