@@ -35,7 +35,7 @@ cp .env.example .env
 如果 API Key 属于其他地域，需要同时把 `LLM_BASE_URL` 改成该地域的 OpenAI 兼容地址；API Key 与地域必须匹配。
 
 ```bash
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8888
 ```
 
 另一个终端启动前端：

@@ -1,7 +1,7 @@
 function apiBaseUrl() {
   const configured = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_XUANSHU_API_URL : "";
   if (configured) return configured.replace(/\/$/, "");
-  if (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)) return "http://localhost:8000";
+  if (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)) return "http://localhost:8888";
   return "";
 }
 
