@@ -29,6 +29,9 @@ class Settings:
     max_history_messages: int = int(os.getenv("MAX_HISTORY_MESSAGES", "12"))
     max_question_length: int = int(os.getenv("MAX_QUESTION_LENGTH", "4000"))
     knowledge_path: str = os.getenv("KNOWLEDGE_PATH", "content/knowledge.json")
+    database_path: str = os.getenv("DATABASE_PATH", "data/xuanshu.db")
+    admin_token: str = os.getenv("ADMIN_TOKEN", "")
+    settings_encryption_key: str = os.getenv("SETTINGS_ENCRYPTION_KEY", "")
 
 
 settings = Settings()

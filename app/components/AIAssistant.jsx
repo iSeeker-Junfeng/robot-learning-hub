@@ -6,7 +6,8 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
-import { isAssistantConfigured, streamAssistant } from "../lib/ai-client";
+import { getApiBaseUrl, streamAssistant } from "../lib/ai-client";
+import { loadLLMSettings } from "../lib/settings-client";
 
 const CHAT_KEY = "xuanshu-ai-conversations-v1";
 const modes = [
@@ -43,7 +44,25 @@ export default function AIAssistant({ open, onClose, chapter, lesson }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    setConfigured(isAssistantConfigured());
+    let active = true;
+    async function checkConfiguration() {
+      if (!getApiBaseUrl()) {
+        if (active) setConfigured(false);
+        return;
+      }
+      try {
+        const result = await loadLLMSettings();
+        if (active) setConfigured(Boolean(result.api_key_configured));
+      } catch (_) {
+        if (active) setConfigured(false);
+      }
+    }
+    checkConfiguration();
+    window.addEventListener("xuanshu-settings-updated", checkConfiguration);
+    return () => {
+      active = false;
+      window.removeEventListener("xuanshu-settings-updated", checkConfiguration);
+    };
   }, []);
 
   useEffect(() => {

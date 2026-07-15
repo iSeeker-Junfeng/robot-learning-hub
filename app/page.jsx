@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapterById, chapterGuides, chapterLessons, chapterResources, graphEdges, graphNodes, resourceCatalog, tracks } from "./data";
 import AIAssistant from "./components/AIAssistant";
+import AISettingsPanel from "./components/AISettingsPanel";
 
 const STORAGE_KEY = "robot-learning-hub-progress-v1";
 const STUDY_KEY = "robot-learning-hub-study-checks-v1";
@@ -50,6 +51,7 @@ export default function Home() {
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [assistantChapter, setAssistantChapter] = useState(null);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const importRef = useRef(null);
 
@@ -189,6 +191,7 @@ export default function Home() {
           <button type="button" className="nav-ai" onClick={() => openAssistant()}>问玄枢</button>
         </nav>
         <div className="top-actions">
+          <button type="button" onClick={() => setSettingsOpen(true)}>AI 配置</button>
           <button type="button" onClick={exportProgress}>导出进度</button>
           <button type="button" onClick={() => importRef.current?.click()}>导入</button>
           <input ref={importRef} type="file" accept="application/json" hidden onChange={importProgress} />
@@ -476,6 +479,7 @@ export default function Home() {
         chapter={assistantChapter ? chapterById[assistantChapter] : null}
         lesson={assistantChapter ? chapterLessons[assistantChapter] : null}
       />
+      <AISettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>
   );

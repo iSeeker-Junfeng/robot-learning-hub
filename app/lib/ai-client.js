@@ -1,8 +1,23 @@
-function apiBaseUrl() {
+const API_URL_KEY = "xuanshu-api-base-url-v1";
+
+export function getApiBaseUrl() {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(API_URL_KEY)?.trim();
+    if (saved) return saved.replace(/\/$/, "");
+  }
   const configured = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_XUANSHU_API_URL : "";
   if (configured) return configured.replace(/\/$/, "");
   if (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)) return "http://localhost:8888";
   return "";
+}
+
+export function setApiBaseUrl(value) {
+  const normalized = value.trim().replace(/\/$/, "");
+  if (typeof window !== "undefined") {
+    if (normalized) localStorage.setItem(API_URL_KEY, normalized);
+    else localStorage.removeItem(API_URL_KEY);
+  }
+  return normalized;
 }
 
 function parseEvent(block) {
@@ -22,11 +37,11 @@ function parseEvent(block) {
 }
 
 export function isAssistantConfigured() {
-  return Boolean(apiBaseUrl());
+  return Boolean(getApiBaseUrl());
 }
 
 export async function streamAssistant(payload, { signal, onEvent }) {
-  const baseUrl = apiBaseUrl();
+  const baseUrl = getApiBaseUrl();
   if (!baseUrl) throw new Error("AI 后端地址尚未配置，请设置 NEXT_PUBLIC_XUANSHU_API_URL。");
   const response = await fetch(`${baseUrl}/api/v1/chat/stream`, {
     method: "POST",
