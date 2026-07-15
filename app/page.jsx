@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { chapterById, chapterGuides, chapterLessons, graphEdges, graphNodes, tracks } from "./data";
+import { chapterById, chapterGuides, chapterLessons, chapterResources, graphEdges, graphNodes, resourceCatalog, tracks } from "./data";
 
 const STORAGE_KEY = "robot-learning-hub-progress-v1";
 const STUDY_KEY = "robot-learning-hub-study-checks-v1";
+const RESOURCE_KEY = "robot-learning-hub-resource-reads-v1";
 const stateLabels = ["未开始", "学习中", "已掌握"];
 
 function ArrowIcon() {
@@ -41,6 +42,7 @@ export default function Home() {
   const [activeTrack, setActiveTrack] = useState("ros2");
   const [progress, setProgress] = useState({});
   const [studyChecks, setStudyChecks] = useState({});
+  const [resourceReads, setResourceReads] = useState({});
   const [query, setQuery] = useState("");
   const [graphFilter, setGraphFilter] = useState("all");
   const [focusedNode, setFocusedNode] = useState("kin-transform");
@@ -54,6 +56,8 @@ export default function Home() {
       if (stored) setProgress(JSON.parse(stored));
       const storedChecks = localStorage.getItem(STUDY_KEY);
       if (storedChecks) setStudyChecks(JSON.parse(storedChecks));
+      const storedResources = localStorage.getItem(RESOURCE_KEY);
+      if (storedResources) setResourceReads(JSON.parse(storedResources));
     } catch (_) {}
   }, []);
 
@@ -68,6 +72,12 @@ export default function Home() {
       localStorage.setItem(STUDY_KEY, JSON.stringify(studyChecks));
     } catch (_) {}
   }, [studyChecks]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(RESOURCE_KEY, JSON.stringify(resourceReads));
+    } catch (_) {}
+  }, [resourceReads]);
 
   useEffect(() => {
     if (!selectedChapter) return undefined;
@@ -100,13 +110,17 @@ export default function Home() {
     setStudyChecks((current) => ({ ...current, [key]: !current[key] }));
   }
 
+  function toggleResourceRead(resourceId) {
+    setResourceReads((current) => ({ ...current, [resourceId]: !current[resourceId] }));
+  }
+
   function jumpToTrack(id) {
     setActiveTrack(id);
     document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function exportProgress() {
-    const payload = { version: 2, exportedAt: new Date().toISOString(), progress, studyChecks };
+    const payload = { version: 3, exportedAt: new Date().toISOString(), progress, studyChecks, resourceReads };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
@@ -128,6 +142,7 @@ export default function Home() {
         if (!next || typeof next !== "object") throw new Error("invalid");
         setProgress(next);
         if (payload.studyChecks && typeof payload.studyChecks === "object") setStudyChecks(payload.studyChecks);
+        if (payload.resourceReads && typeof payload.resourceReads === "object") setResourceReads(payload.resourceReads);
         setNotice("进度已恢复");
       } catch (_) {
         setNotice("无法识别这个进度文件");
@@ -142,6 +157,10 @@ export default function Home() {
   const selected = selectedChapter ? chapterById[selectedChapter] : null;
   const selectedGuide = selectedChapter ? chapterGuides[selectedChapter] : null;
   const selectedLesson = selectedChapter ? chapterLessons[selectedChapter] : null;
+  const selectedResources = selectedChapter
+    ? (chapterResources[selectedChapter] || []).map((id) => ({ id, ...resourceCatalog[id] })).filter((item) => item.title)
+    : [];
+  const selectedResourceCount = selectedResources.filter((item) => resourceReads[item.id]).length;
   const selectedStepCount = selectedChapter && selectedGuide
     ? selectedGuide.materials.filter((_, index) => studyChecks[`${selectedChapter}:${index}`]).length
     : 0;
@@ -402,6 +421,29 @@ export default function Home() {
               <article className="quiz-card">
                 <span className="sheet-index">05 / 学完自测</span>
                 <ol>{selectedLesson.quiz.map((item, index) => <li key={item}><span>Q{index + 1}</span><p>{item}</p></li>)}</ol>
+              </article>
+              <article className="resources-card">
+                <div className="resource-summary">
+                  <span className="sheet-index">06 / 精选资料</span>
+                  <strong>{selectedResourceCount}/{selectedResources.length} 已读</strong>
+                </div>
+                <p className="resource-lead">按当前章节筛选的官方文档、规范、论文与开源实现。建议先完成分步学习，再带着问题阅读。</p>
+                <div className="resource-list">
+                  {selectedResources.map((resource) => {
+                    const isRead = Boolean(resourceReads[resource.id]);
+                    return (
+                      <section className={`resource-item ${isRead ? "read" : ""}`} key={resource.id}>
+                        <div className="resource-tags"><span className="resource-type">{resource.category}</span><span>{resource.level}</span><span>{resource.duration}</span></div>
+                        <h3>{resource.title}</h3>
+                        <p>{resource.note}</p>
+                        <div className="resource-actions">
+                          <button type="button" className="resource-read" onClick={() => toggleResourceRead(resource.id)} aria-pressed={isRead}>{isRead ? "✓ 已读" : "标记已读"}</button>
+                          <a className="resource-open" href={resource.url} target="_blank" rel="noreferrer">一键打开 <ArrowIcon /></a>
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
               </article>
             </div>
             <div className="sheet-footer">
