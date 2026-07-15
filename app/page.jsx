@@ -173,7 +173,7 @@ export default function Home() {
       <header className="topbar">
         <a className="brand" href="#top" aria-label="返回顶部">
           <span className="brand-mark"><i></i><i></i><i></i></span>
-          <span>ROBOT<span>/</span>NEXUS</span>
+          <span>XUANSHU<span>/</span>玄枢</span>
         </a>
         <nav aria-label="主导航">
           <a href="#roadmap">学习路线</a>
@@ -456,7 +456,7 @@ export default function Home() {
       )}
 
       <footer>
-        <div className="brand"><span className="brand-mark"><i></i><i></i><i></i></span><span>ROBOT<span>/</span>NEXUS</span></div>
+        <div className="brand"><span className="brand-mark"><i></i><i></i><i></i></span><span>XUANSHU<span>/</span>玄枢</span></div>
         <p>持续学习的关键，不是收藏更多知识，而是让知识之间真正连接。</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
