@@ -7,7 +7,7 @@
 - `app/`：React 前端，负责学习路线、章节、进度、精选资料和“问玄枢”交互。
 - `backend/`：独立 FastAPI 服务，负责知识检索、提示词组装和模型调用。
 - `content/knowledge.json`：由前端课程数据生成的后端知识快照，避免前后端各维护一份课程内容。
-- 模型服务通过 OpenAI 兼容协议接入，默认配置为 DeepSeek，也可以替换为其他兼容服务。
+- 模型服务通过 OpenAI 兼容协议接入，默认使用阿里云百炼 DashScope，也可以替换为其他兼容服务。
 
 ## 本地运行
 
@@ -30,7 +30,9 @@ pip install -e ".[dev]"
 cp .env.example .env
 ```
 
-在 `backend/.env` 中设置 `LLM_API_KEY`。默认模型是 `deepseek-v4-flash`，密钥只保存在后端。
+在 `backend/.env` 中设置 `DASHSCOPE_API_KEY`。默认使用中国内地 DashScope 兼容地址和 `qwen-plus`；如需固定当前新版本，可以把 `LLM_MODEL` 改为百炼控制台中已开通的模型，例如 `qwen3.7-plus`。密钥只保存在后端。
+
+如果 API Key 属于其他地域，需要同时把 `LLM_BASE_URL` 改成该地域的 OpenAI 兼容地址；API Key 与地域必须匹配。
 
 ```bash
 uvicorn app.main:app --reload --port 8000

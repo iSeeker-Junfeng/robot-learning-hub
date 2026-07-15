@@ -15,7 +15,7 @@ class LLMConfigurationError(RuntimeError):
 class OpenAICompatibleProvider:
     def __init__(self):
         if not settings.llm_api_key:
-            raise LLMConfigurationError("后端尚未配置 LLM_API_KEY")
+            raise LLMConfigurationError("后端尚未配置 DASHSCOPE_API_KEY")
 
     async def stream(self, messages: list[dict]) -> AsyncIterator[str]:
         payload = {

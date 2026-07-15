@@ -146,7 +146,7 @@ export default function AIAssistant({ open, onClose, chapter, lesson }) {
         <div><button type="button" onClick={clearConversation} aria-label="清空对话">清空</button><button type="button" onClick={onClose} aria-label="关闭 AI 助教">×</button></div>
       </header>
       <div className="ai-context">
-        <i></i><span>{chapter ? `${chapter.track.name} · ${chapter.no}` : "全局学习路线"}</span><em>{configured ? "AI ONLINE" : "WAITING FOR API"}</em>
+        <i></i><span>{chapter ? `${chapter.track.name} · ${chapter.no}` : "全局学习路线"}</span><em>{configured ? "DASHSCOPE READY" : "WAITING FOR API"}</em>
       </div>
       <div className="ai-messages" aria-live="polite">
         {!messages.length && (

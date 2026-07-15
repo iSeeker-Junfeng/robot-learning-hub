@@ -10,6 +10,8 @@ def test_health_reports_configuration_state():
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+    assert response.json()["provider"] == "dashscope"
+    assert response.json()["model"] == "qwen-plus"
 
 
 def test_chat_request_validation():
