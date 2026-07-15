@@ -1,0 +1,1730 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": "robot-architecture",
+      "track": {
+        "id": "robot",
+        "name": "机器人系统",
+        "eyebrow": "SYSTEMS"
+      },
+      "title": "全栈架构与分层",
+      "description": "驱动层、能力层、任务层、应用层与数据流",
+      "level": "基础",
+      "estimated_time": "4h",
+      "goal": "能够把一个机器人需求拆成边界清晰、可替换、可测试的软件模块，而不是把所有逻辑堆进节点。",
+      "materials": [
+        {
+          "title": "机器人软件分层：驱动、能力、任务、应用",
+          "detail": "驱动层只处理硬件协议与原始数据；能力层封装定位、抓取等可复用能力；任务层编排流程；应用层面向用户和业务。"
+        },
+        {
+          "title": "数据流、控制流与依赖方向",
+          "detail": "数据流回答信息如何移动，控制流回答谁触发谁。两者要分开画，才能发现循环依赖和隐藏耦合。"
+        },
+        {
+          "title": "模块接口、Registry 与配置驱动设计",
+          "detail": "使用抽象接口和注册表按配置创建模块，让型号、算法版本或部署方式变化时不侵入业务代码。"
+        }
+      ],
+      "pitfalls": [
+        "按团队成员而不是职责划分模块，最终接口仍然混乱",
+        "让任务层直接访问串口、CAN 或厂商 SDK"
+      ],
+      "project": "为一台移动机械臂画出完整分层架构图，并定义各层输入、输出和故障边界。",
+      "acceptance": [
+        "任一硬件或算法模块可被替换而不改动上层业务",
+        "能解释一次任务从请求到执行反馈的完整链路"
+      ],
+      "quiz": [
+        "更换机械臂品牌时，理想情况下应该改动哪些层？",
+        "为什么数据依赖方向通常应该由上层指向抽象，而不是具体实现？"
+      ],
+      "resources": [
+        {
+          "id": "ros2-design",
+          "title": "ROS 2 Design",
+          "category": "官方设计",
+          "level": "进阶",
+          "duration": "30 分钟",
+          "url": "https://design.ros2.org/",
+          "note": "从设计文档理解 ROS 2 为什么这样实现。"
+        },
+        {
+          "id": "ros2-basic",
+          "title": "ROS 2 基础概念",
+          "category": "官方文档",
+          "level": "基础",
+          "duration": "35 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Basic.html",
+          "note": "Node、Topic、Service、Action 等核心概念入口。"
+        },
+        {
+          "id": "rep-quality",
+          "title": "REP-2004 软件质量规范",
+          "category": "规范",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://www.ros.org/reps/rep-2004.html",
+          "note": "用于建立测试、质量等级与工程交付标准。"
+        }
+      ]
+    },
+    {
+      "id": "robot-perception",
+      "track": {
+        "id": "robot",
+        "name": "机器人系统",
+        "eyebrow": "SYSTEMS"
+      },
+      "title": "感知与传感器融合",
+      "description": "相机、激光雷达、IMU、力传感器与时间同步",
+      "level": "核心",
+      "estimated_time": "8h",
+      "goal": "能建立带时间、坐标和质量评估的感知链路，让识别结果真正可用于机器人控制。",
+      "materials": [
+        {
+          "title": "相机、LiDAR、IMU、力传感器的数据特征",
+          "detail": "先理解各传感器的观测量、频率、噪声和失效模式，再决定互补关系，不能只因为设备可用就全部融合。"
+        },
+        {
+          "title": "时间戳、坐标系与外参标定",
+          "detail": "融合前必须统一时间基准和坐标基准；外参描述传感器之间的刚体关系，时间偏差会把运动误认为空间误差。"
+        },
+        {
+          "title": "滤波、同步与多传感器融合基础",
+          "detail": "滤波用于抑制噪声，融合用于综合多源信息。应同时输出估计值和置信度，避免下游盲目信任。"
+        }
+      ],
+      "pitfalls": [
+        "只校准空间外参，不检查时间同步",
+        "把平滑后的曲线当作精度提升，却忽略滤波延迟"
+      ],
+      "project": "建立相机 + IMU 感知管线，记录频率、延迟、丢帧和时间偏差。",
+      "acceptance": [
+        "输出可复现的传感器频率与延迟报告",
+        "能定位时间不同步和坐标系错误"
+      ],
+      "quiz": [
+        "机器人运动时点云出现重影，优先检查哪些因素？",
+        "传感器频率高是否一定意味着控制效果更好？"
+      ],
+      "resources": [
+        {
+          "id": "roboticsbook",
+          "title": "Introduction to Robotics and Perception",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://www.roboticsbook.org/",
+          "note": "坐标、感知、状态估计和机器人系统的可交互教材。"
+        },
+        {
+          "id": "isaac-ros",
+          "title": "NVIDIA Isaac ROS Nova",
+          "category": "官方代码",
+          "level": "工程",
+          "duration": "45 分钟",
+          "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nova",
+          "note": "参考 Jetson 上多传感器、时间同步与硬件加速集成。"
+        },
+        {
+          "id": "ros2-tf2",
+          "title": "TF2 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Tf2-Main.html",
+          "note": "跟随教程建立、发布和查询坐标树。"
+        }
+      ]
+    },
+    {
+      "id": "robot-fsm",
+      "track": {
+        "id": "robot",
+        "name": "机器人系统",
+        "eyebrow": "SYSTEMS"
+      },
+      "title": "状态机与任务编排",
+      "description": "主/子状态机、Context、异常恢复与动作原子",
+      "level": "核心",
+      "estimated_time": "6h",
+      "goal": "能够设计可预测、可恢复、可测试的任务状态机，并清楚哪些数据必须放入 Context。",
+      "materials": [
+        {
+          "title": "状态、事件、转移、守卫条件与动作",
+          "detail": "状态表示稳定阶段，事件表示外部或内部事实，守卫条件决定转移是否允许，动作只执行转移相关副作用。"
+        },
+        {
+          "title": "主状态机、子状态机与 Context",
+          "detail": "主状态机管理业务阶段，子状态机封装可复用流程；Context 保存跨状态需要的数据、重试次数和恢复依据。"
+        },
+        {
+          "title": "超时、重试、回滚和异常恢复",
+          "detail": "所有等待都要有超时，所有重试都要有上限，异常路径必须进入已定义的安全状态而不是留在半完成状态。"
+        }
+      ],
+      "pitfalls": [
+        "把每个函数调用都设计成一个状态，导致状态爆炸",
+        "依赖全局变量保存状态，重启后无法判断真实进度"
+      ],
+      "project": "实现取料—扫码—搬运—放料状态机，加入重试耗尽和人工恢复分支。",
+      "acceptance": [
+        "非法事件不会破坏当前状态",
+        "程序重启后能依据持久化 Context 安全恢复"
+      ],
+      "quiz": [
+        "Context 与普通局部变量的边界是什么？",
+        "什么时候应该拆成子状态机而不是继续增加主状态？"
+      ],
+      "resources": [
+        {
+          "id": "boost-sml",
+          "title": "Boost.Ext SML",
+          "category": "开源代码",
+          "level": "进阶",
+          "duration": "45 分钟",
+          "url": "https://github.com/boost-ext/sml",
+          "note": "学习现代 C++ 状态机的声明式转移表实现。"
+        },
+        {
+          "id": "smacc2",
+          "title": "SMACC2",
+          "category": "开源框架",
+          "level": "进阶",
+          "duration": "45 分钟",
+          "url": "https://smacc2.robosoft.ai/",
+          "note": "面向 ROS 2 的异步、可扩展状态机框架。"
+        },
+        {
+          "id": "ros2-lifecycle",
+          "title": "ROS 2 Managed Nodes",
+          "category": "官方设计",
+          "level": "工程",
+          "duration": "35 分钟",
+          "url": "https://design.ros2.org/articles/node_lifecycle.html",
+          "note": "阅读生命周期状态、转移和错误处理原始设计。"
+        }
+      ]
+    },
+    {
+      "id": "robot-control",
+      "track": {
+        "id": "robot",
+        "name": "机器人系统",
+        "eyebrow": "SYSTEMS"
+      },
+      "title": "规划、控制与闭环",
+      "description": "任务规划、轨迹生成、运动控制与反馈校正",
+      "level": "进阶",
+      "estimated_time": "10h",
+      "goal": "能从任务目标逐层得到可执行轨迹，并用反馈数据评价控制器是否稳定、准确。",
+      "materials": [
+        {
+          "title": "任务规划、路径规划与轨迹规划的边界",
+          "detail": "任务规划决定做什么，路径规划决定经过哪里，轨迹规划再为路径加入时间、速度和加速度约束。"
+        },
+        {
+          "title": "位置、速度、力矩控制闭环",
+          "detail": "位置环消除位置误差，速度环改善动态响应，电流或力矩环直接影响执行器输出；内环通常更快。"
+        },
+        {
+          "title": "前馈、反馈、误差与稳定性",
+          "detail": "前馈依据模型预先补偿，反馈依据误差修正。分析控制效果要同时看稳态误差、超调、带宽和扰动恢复。"
+        }
+      ],
+      "pitfalls": [
+        "只比较最终位置，不观察运动过程中的速度和误差",
+        "轨迹点位置连续但速度不连续，导致机械冲击"
+      ],
+      "project": "让机械臂完成带速度约束的点到点轨迹，并绘制目标与实际关节曲线。",
+      "acceptance": [
+        "轨迹连续且不超过速度和加速度限制",
+        "能量化稳态误差、超调和跟踪延迟"
+      ],
+      "quiz": [
+        "路径和轨迹的核心区别是什么？",
+        "增加控制增益为什么可能让系统振荡？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "ros2-control",
+          "title": "ros2_control Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "60 分钟",
+          "url": "https://control.ros.org/rolling/index.html",
+          "note": "理解硬件接口、控制器与 Controller Manager。"
+        },
+        {
+          "id": "moveit2",
+          "title": "MoveIt 2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://moveit.picknik.ai/main/index.html",
+          "note": "机械臂建模、Planning Scene、规划与执行入口。"
+        }
+      ]
+    },
+    {
+      "id": "robot-safety",
+      "track": {
+        "id": "robot",
+        "name": "机器人系统",
+        "eyebrow": "SYSTEMS"
+      },
+      "title": "系统安全与可靠性",
+      "description": "急停、限位、避障、看门狗、故障码与降级",
+      "level": "工程",
+      "estimated_time": "6h",
+      "goal": "能用风险和失效模式设计多层安全机制，使单点故障不会直接演化为人员或设备事故。",
+      "materials": [
+        {
+          "title": "物理急停、软件停机与安全状态",
+          "detail": "物理急停必须独立切断危险能量；软件停机用于受控减速和保存状态，两者不能互相替代。"
+        },
+        {
+          "title": "碰撞、限位、看门狗和通信失联",
+          "detail": "对碰撞、越界、通信丢失和传感器异常分别定义检测源、判定阈值、响应时间与安全动作。"
+        },
+        {
+          "title": "故障等级、故障码与降级策略",
+          "detail": "故障等级决定是否继续、降级或停机；恢复条件必须比触发条件更严格，避免系统在故障边缘反复切换。"
+        }
+      ],
+      "pitfalls": [
+        "把急停按钮只接入普通软件 Topic",
+        "记录了错误码，却没有定义故障恢复的前置条件"
+      ],
+      "project": "为机器人设计安全矩阵，覆盖人员进入、传感器掉线、电量不足和执行器异常。",
+      "acceptance": [
+        "每个危险事件都有检测、响应和恢复条件",
+        "任何单点软件故障不会绕过物理急停"
+      ],
+      "quiz": [
+        "为什么安全链路不能只依赖主控计算机？",
+        "哪些故障适合自动恢复，哪些必须人工确认？"
+      ],
+      "resources": [
+        {
+          "id": "rep-quality",
+          "title": "REP-2004 软件质量规范",
+          "category": "规范",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://www.ros.org/reps/rep-2004.html",
+          "note": "用于建立测试、质量等级与工程交付标准。"
+        },
+        {
+          "id": "ros2-lifecycle",
+          "title": "ROS 2 Managed Nodes",
+          "category": "官方设计",
+          "level": "工程",
+          "duration": "35 分钟",
+          "url": "https://design.ros2.org/articles/node_lifecycle.html",
+          "note": "阅读生命周期状态、转移和错误处理原始设计。"
+        },
+        {
+          "id": "ros2-control",
+          "title": "ros2_control Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "60 分钟",
+          "url": "https://control.ros.org/rolling/index.html",
+          "note": "理解硬件接口、控制器与 Controller Manager。"
+        }
+      ]
+    },
+    {
+      "id": "ros2-core",
+      "track": {
+        "id": "ros2",
+        "name": "ROS 2 工程",
+        "eyebrow": "MIDDLEWARE"
+      },
+      "title": "节点与通信模型",
+      "description": "Node、Topic、Service、Action 与接口设计",
+      "level": "基础",
+      "estimated_time": "6h",
+      "goal": "能根据通信语义正确选择 ROS 2 接口，并设计长期兼容、易调试的消息结构。",
+      "materials": [
+        {
+          "title": "Node、Topic、Service、Action 的语义区别",
+          "detail": "Topic 用于持续数据流；Service 用于短时请求响应；Action 用于耗时、可反馈、可取消的任务。选择依据是语义，不是代码方便。"
+        },
+        {
+          "title": "msg、srv、action 接口设计",
+          "detail": "接口先定义单位、坐标系、时间戳、有效范围和错误语义，再定义字段。避免把所有内容塞进字符串或 JSON。"
+        },
+        {
+          "title": "命名空间、参数与 Launch 基础",
+          "detail": "命名空间隔离多设备，参数描述部署差异，Launch 负责组装系统；三者共同决定同一代码如何复用。"
+        }
+      ],
+      "pitfalls": [
+        "用 Service 执行长时间机械臂动作，无法反馈和取消",
+        "自定义消息缺少时间戳、单位或 frame_id"
+      ],
+      "project": "实现一个传感器发布节点和带反馈、取消能力的机械臂任务 Action。",
+      "acceptance": [
+        "能根据交互语义选择 Topic、Service 或 Action",
+        "接口包含时间戳、frame_id、错误码和可观测反馈"
+      ],
+      "quiz": [
+        "遥操作关节流应该用 Topic 还是 Action？为什么？",
+        "什么情况下 Service 比 Topic 更合适？"
+      ],
+      "resources": [
+        {
+          "id": "ros2-basic",
+          "title": "ROS 2 基础概念",
+          "category": "官方文档",
+          "level": "基础",
+          "duration": "35 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Basic.html",
+          "note": "Node、Topic、Service、Action 等核心概念入口。"
+        },
+        {
+          "id": "ros2-design",
+          "title": "ROS 2 Design",
+          "category": "官方设计",
+          "level": "进阶",
+          "duration": "30 分钟",
+          "url": "https://design.ros2.org/",
+          "note": "从设计文档理解 ROS 2 为什么这样实现。"
+        },
+        {
+          "id": "rep-quality",
+          "title": "REP-2004 软件质量规范",
+          "category": "规范",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://www.ros.org/reps/rep-2004.html",
+          "note": "用于建立测试、质量等级与工程交付标准。"
+        }
+      ]
+    },
+    {
+      "id": "ros2-qos",
+      "track": {
+        "id": "ros2",
+        "name": "ROS 2 工程",
+        "eyebrow": "MIDDLEWARE"
+      },
+      "title": "QoS 与执行器",
+      "description": "可靠性、历史策略、Callback Group 与多线程",
+      "level": "核心",
+      "estimated_time": "8h",
+      "goal": "能为不同数据选择 QoS 和执行模型，并用测量数据解释延迟、丢帧与吞吐之间的权衡。",
+      "materials": [
+        {
+          "title": "Reliability、Durability、History 与 Depth",
+          "detail": "Reliability 决定是否重传，Durability 决定晚加入者能否收到历史数据，History 与 Depth 决定缓存策略。"
+        },
+        {
+          "title": "Executor、Callback Group 与线程模型",
+          "detail": "Executor 调度回调，Callback Group 约束回调是否可并行；多线程只有在回调组和共享数据设计正确时才产生收益。"
+        },
+        {
+          "title": "背压、丢帧、死锁与实时回调",
+          "detail": "高频传感器常优先新鲜度而非完整性。缓存过深会把短时拥塞变成长延迟，必须结合实时需求压测。"
+        }
+      ],
+      "pitfalls": [
+        "所有 Topic 一律 Reliable，网络抖动时延迟不断累积",
+        "使用多线程执行器，却把所有回调放在互斥回调组"
+      ],
+      "project": "对 300 Hz IMU 和 30 Hz 图像分别设计 QoS，并压测单线程与多线程执行器。",
+      "acceptance": [
+        "给出吞吐、延迟、CPU 和丢帧对比数据",
+        "回调分组不会产生数据竞争或互相阻塞"
+      ],
+      "quiz": [
+        "相机画面为什么常使用 Best Effort + Keep Last(1)？",
+        "多线程 Executor 什么时候反而会更慢？"
+      ],
+      "resources": [
+        {
+          "id": "ros2-qos",
+          "title": "ROS 2 QoS 设置",
+          "category": "官方文档",
+          "level": "核心",
+          "duration": "30 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Intermediate/About-Quality-of-Service-Settings.html",
+          "note": "系统理解可靠性、历史记录和传感器 QoS。"
+        },
+        {
+          "id": "ros2-executors",
+          "title": "ROS 2 Executors",
+          "category": "官方文档",
+          "level": "进阶",
+          "duration": "35 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Intermediate/About-Executors.html",
+          "note": "理解回调调度、Callback Group 与线程模型。"
+        },
+        {
+          "id": "ros2-design",
+          "title": "ROS 2 Design",
+          "category": "官方设计",
+          "level": "进阶",
+          "duration": "30 分钟",
+          "url": "https://design.ros2.org/",
+          "note": "从设计文档理解 ROS 2 为什么这样实现。"
+        }
+      ]
+    },
+    {
+      "id": "ros2-tf",
+      "track": {
+        "id": "ros2",
+        "name": "ROS 2 工程",
+        "eyebrow": "MIDDLEWARE"
+      },
+      "title": "TF2、URDF 与坐标树",
+      "description": "坐标变换、机器人模型、静态/动态 TF",
+      "level": "核心",
+      "estimated_time": "8h",
+      "goal": "能读懂并构建 TF 树，正确完成任意传感器、机器人基座和工具之间的时空变换。",
+      "materials": [
+        {
+          "title": "TF 树的父子关系与坐标变换方向",
+          "detail": "树中的边表示父坐标系到子坐标系的位姿；查询时先写清源坐标系和目标坐标系，避免凭名称猜乘法方向。"
+        },
+        {
+          "title": "静态 TF、动态 TF 与时间查询",
+          "detail": "固定安装关系发布静态 TF，运动关节发布动态 TF。查询动态 TF 必须考虑消息时间，而不是总取最新值。"
+        },
+        {
+          "title": "URDF link、joint、visual、collision",
+          "detail": "URDF 的 link 表示刚体，joint 表示约束关系；visual 负责显示，collision 负责碰撞计算，两者可以不同。"
+        }
+      ],
+      "pitfalls": [
+        "把物体坐标值直接当成 base_link 下的坐标使用",
+        "TF 发布频率正常，但时间戳来自错误时钟"
+      ],
+      "project": "建立 base_link—arm—camera—tool0 坐标树，并把相机目标转换到机器人基座。",
+      "acceptance": [
+        "TF 树无环、无多父节点且命名一致",
+        "可手算并验证一次 camera 到 base_link 的变换"
+      ],
+      "quiz": [
+        "已知点在 camera_link 下的坐标，如何转换到 base_link？",
+        "为什么 TF 树中一个子坐标系不能有两个父节点？"
+      ],
+      "resources": [
+        {
+          "id": "ros2-tf2",
+          "title": "TF2 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Tf2-Main.html",
+          "note": "跟随教程建立、发布和查询坐标树。"
+        },
+        {
+          "id": "ros2-urdf",
+          "title": "URDF 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/URDF/URDF-Main.html",
+          "note": "从 link 和 joint 开始建立机器人模型。"
+        },
+        {
+          "id": "roboticsbook",
+          "title": "Introduction to Robotics and Perception",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://www.roboticsbook.org/",
+          "note": "坐标、感知、状态估计和机器人系统的可交互教材。"
+        }
+      ]
+    },
+    {
+      "id": "ros2-runtime",
+      "track": {
+        "id": "ros2",
+        "name": "ROS 2 工程",
+        "eyebrow": "MIDDLEWARE"
+      },
+      "title": "组件化与生命周期",
+      "description": "Components、Lifecycle、Launch 与参数管理",
+      "level": "工程",
+      "estimated_time": "6h",
+      "goal": "能把 ROS 2 节点组织成可控启动、低开销运行、故障可诊断的工程系统。",
+      "materials": [
+        {
+          "title": "Composable Node 与进程内通信",
+          "detail": "Component 让多个节点运行在同一进程并支持进程内通信，但也共享故障域，需要权衡性能和隔离性。"
+        },
+        {
+          "title": "Lifecycle 状态与受控启动",
+          "detail": "Lifecycle 把创建、配置、激活和停机显式化，适合有硬件依赖和启动顺序的节点。"
+        },
+        {
+          "title": "参数、Launch、诊断和日志",
+          "detail": "参数描述可变配置，Launch 描述系统组合，诊断与日志描述运行健康；不要把业务状态藏在参数中。"
+        }
+      ],
+      "pitfalls": [
+        "为了省进程把所有节点放进一个组件容器，导致单点崩溃",
+        "节点构造函数中直接启动硬件，无法受控配置和恢复"
+      ],
+      "project": "把三个传感器节点组件化，并用 Lifecycle 控制配置、激活与安全停机。",
+      "acceptance": [
+        "启动顺序和失败回滚可重复",
+        "组件与独立进程模式均可通过配置运行"
+      ],
+      "quiz": [
+        "哪些节点适合组件化，哪些应保持进程隔离？",
+        "Lifecycle 的 inactive 状态应该允许哪些行为？"
+      ],
+      "resources": [
+        {
+          "id": "ros2-composition",
+          "title": "ROS 2 Composition",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Intermediate/About-Composition.html",
+          "note": "掌握组件容器与进程内组合方式。"
+        },
+        {
+          "id": "ros2-lifecycle",
+          "title": "ROS 2 Managed Nodes",
+          "category": "官方设计",
+          "level": "工程",
+          "duration": "35 分钟",
+          "url": "https://design.ros2.org/articles/node_lifecycle.html",
+          "note": "阅读生命周期状态、转移和错误处理原始设计。"
+        },
+        {
+          "id": "ros2-executors",
+          "title": "ROS 2 Executors",
+          "category": "官方文档",
+          "level": "进阶",
+          "duration": "35 分钟",
+          "url": "https://docs.ros.org/en/rolling/Concepts/Intermediate/About-Executors.html",
+          "note": "理解回调调度、Callback Group 与线程模型。"
+        }
+      ]
+    },
+    {
+      "id": "ros2-stack",
+      "track": {
+        "id": "ros2",
+        "name": "ROS 2 工程",
+        "eyebrow": "MIDDLEWARE"
+      },
+      "title": "Nav2、MoveIt 2、ros2_control",
+      "description": "导航、机械臂规划与硬件控制框架",
+      "level": "进阶",
+      "estimated_time": "14h",
+      "goal": "能理解 Nav2、MoveIt 2 与 ros2_control 的职责边界，并把移动、规划和执行连接成闭环。",
+      "materials": [
+        {
+          "title": "Nav2 行为树、代价地图和规划器",
+          "detail": "Nav2 通过行为树编排导航，规划器产生路径，控制器跟踪路径，代价地图表达静态和动态障碍。"
+        },
+        {
+          "title": "MoveIt 2 Planning Scene 与执行链",
+          "detail": "MoveIt 2 在 Planning Scene 中检查机器人与环境碰撞，生成关节轨迹，但真实执行由控制器完成。"
+        },
+        {
+          "title": "ros2_control 硬件接口与控制器",
+          "detail": "ros2_control 用硬件接口隔离设备差异，Controller Manager 管理控制器生命周期和资源占用。"
+        }
+      ],
+      "pitfalls": [
+        "把 MoveIt 2 当作底层电机控制器",
+        "规划成功后直接认为任务成功，不检查实际执行结果"
+      ],
+      "project": "完成移动底盘到达工位后，机械臂规划抓取并执行的联合演示。",
+      "acceptance": [
+        "导航失败和抓取失败都有恢复流程",
+        "规划场景、控制器状态与执行结果可观测"
+      ],
+      "quiz": [
+        "Nav2 全局规划器和局部控制器分别解决什么问题？",
+        "MoveIt 2 与 ros2_control 之间传递的核心数据是什么？"
+      ],
+      "resources": [
+        {
+          "id": "nav2",
+          "title": "Nav2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://docs.nav2.org/",
+          "note": "导航概念、行为树、规划器、控制器和代价地图。"
+        },
+        {
+          "id": "moveit2",
+          "title": "MoveIt 2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://moveit.picknik.ai/main/index.html",
+          "note": "机械臂建模、Planning Scene、规划与执行入口。"
+        },
+        {
+          "id": "ros2-control",
+          "title": "ros2_control Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "60 分钟",
+          "url": "https://control.ros.org/rolling/index.html",
+          "note": "理解硬件接口、控制器与 Controller Manager。"
+        }
+      ]
+    },
+    {
+      "id": "kin-coordinates",
+      "track": {
+        "id": "kinematics",
+        "name": "机器人运动学",
+        "eyebrow": "MATHEMATICS"
+      },
+      "title": "坐标系、向量与矩阵",
+      "description": "方向、位移、基变换与矩阵运算直觉",
+      "level": "基础",
+      "estimated_time": "6h",
+      "goal": "建立坐标表示的直觉，能区分几何对象本身与它在某个坐标系中的数值表示。",
+      "materials": [
+        {
+          "title": "向量、点、基与坐标表示",
+          "detail": "点表示位置，向量表示方向和大小，基决定坐标数字的含义；同一个几何向量在不同基下坐标不同。"
+        },
+        {
+          "title": "矩阵乘法的几何意义",
+          "detail": "矩阵乘向量可看作变换，也可看作基向量线性组合；理解这一点比记公式更重要。"
+        },
+        {
+          "title": "主动变换与被动变换",
+          "detail": "主动变换改变物体，被动变换改变观察坐标系；数值公式相似但物理含义和旋转方向相反。"
+        }
+      ],
+      "pitfalls": [
+        "把坐标数值当作与坐标系无关的绝对位置",
+        "只背矩阵公式，不标注向量属于哪个坐标系"
+      ],
+      "project": "手算二维坐标点在旋转、平移和换基后的结果，再用代码验证。",
+      "acceptance": [
+        "不混淆点、向量和坐标值",
+        "能解释矩阵乘法顺序为什么不能随意交换"
+      ],
+      "quiz": [
+        "同一个点换坐标系后，什么改变、什么不变？",
+        "为什么矩阵 AB 与 BA 通常表示不同变换？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "roboticsbook",
+          "title": "Introduction to Robotics and Perception",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://www.roboticsbook.org/",
+          "note": "坐标、感知、状态估计和机器人系统的可交互教材。"
+        },
+        {
+          "id": "scipy-rotation",
+          "title": "SciPy Rotation API",
+          "category": "代码参考",
+          "level": "基础",
+          "duration": "20 分钟",
+          "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html",
+          "note": "用代码验证四元数、欧拉角和旋转矩阵互转。"
+        }
+      ]
+    },
+    {
+      "id": "kin-rotation",
+      "track": {
+        "id": "kinematics",
+        "name": "机器人运动学",
+        "eyebrow": "MATHEMATICS"
+      },
+      "title": "旋转、欧拉角与四元数",
+      "description": "SO(3)、旋转次序、xyzw 与奇异性",
+      "level": "核心",
+      "estimated_time": "8h",
+      "goal": "能在旋转矩阵、欧拉角和四元数之间转换，并理解每种表示的约束与局限。",
+      "materials": [
+        {
+          "title": "SO(3) 旋转矩阵",
+          "detail": "旋转矩阵的列向量是旋转后坐标轴，满足正交且行列式为 1；它直观但有 9 个数和 6 个约束。"
+        },
+        {
+          "title": "欧拉角顺序与万向锁",
+          "detail": "欧拉角紧凑易读，但旋转顺序不可省略，并在特定姿态出现万向锁。"
+        },
+        {
+          "title": "单位四元数、xyzw 与半角公式",
+          "detail": "单位四元数用半角编码旋转，必须归一化；q 与 -q 表示同一姿态，插值时要选择最短路径。"
+        }
+      ],
+      "pitfalls": [
+        "混用 XYZ 固定轴旋转和 XYZ 随体轴旋转",
+        "把非单位 xyzw 直接作为合法姿态"
+      ],
+      "project": "编写欧拉角、旋转矩阵和四元数互转程序，覆盖 z 轴 ±90°。",
+      "acceptance": [
+        "四元数归一化且 q 与 -q 表示同一姿态",
+        "转换结果通过矩阵正交性和行列式验证"
+      ],
+      "quiz": [
+        "绕 Z 轴 90° 的四元数为什么使用 45° 的正弦和余弦？",
+        "如何验证一个 3×3 矩阵是不是旋转矩阵？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "scipy-rotation",
+          "title": "SciPy Rotation API",
+          "category": "代码参考",
+          "level": "基础",
+          "duration": "20 分钟",
+          "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html",
+          "note": "用代码验证四元数、欧拉角和旋转矩阵互转。"
+        },
+        {
+          "id": "ros2-tf2",
+          "title": "TF2 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Tf2-Main.html",
+          "note": "跟随教程建立、发布和查询坐标树。"
+        }
+      ]
+    },
+    {
+      "id": "kin-transform",
+      "track": {
+        "id": "kinematics",
+        "name": "机器人运动学",
+        "eyebrow": "MATHEMATICS"
+      },
+      "title": "齐次变换与 TF 树",
+      "description": "SE(3)、坐标链、复合变换与逆变换",
+      "level": "核心",
+      "estimated_time": "8h",
+      "goal": "能用齐次矩阵表达刚体位姿，正确组合坐标链并验证变换方向。",
+      "materials": [
+        {
+          "title": "SE(3) 齐次变换矩阵",
+          "detail": "齐次矩阵上左角是旋转，右上角是平移，最后一行使旋转和平移可以统一用矩阵乘法组合。"
+        },
+        {
+          "title": "旋转和平移的组合顺序",
+          "detail": "矩阵连乘从右向左作用；平移量必须表达在对应父坐标系中，不能只看数值。"
+        },
+        {
+          "title": "坐标链、逆变换与 TF 查询",
+          "detail": "逆变换的旋转是转置，平移是负的旋转转置乘原平移；它不是简单把所有元素取负。"
+        }
+      ],
+      "pitfalls": [
+        "坐标链顺序正确但每个矩阵的方向标注错误",
+        "把平移和旋转交换顺序，得到不同物理结果"
+      ],
+      "project": "根据已知外参计算物体从相机坐标系到机械臂基坐标系的位姿。",
+      "acceptance": [
+        "能写出每个变换的上下标和方向",
+        "正向变换与逆变换相乘得到单位矩阵"
+      ],
+      "quiz": [
+        "为什么齐次矩阵需要扩展为 4×4？",
+        "如何不用完整矩阵求逆就得到刚体变换的逆？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "roboticsbook",
+          "title": "Introduction to Robotics and Perception",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://www.roboticsbook.org/",
+          "note": "坐标、感知、状态估计和机器人系统的可交互教材。"
+        },
+        {
+          "id": "ros2-tf2",
+          "title": "TF2 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/Tf2/Tf2-Main.html",
+          "note": "跟随教程建立、发布和查询坐标树。"
+        }
+      ]
+    },
+    {
+      "id": "kin-fk",
+      "track": {
+        "id": "kinematics",
+        "name": "机器人运动学",
+        "eyebrow": "MATHEMATICS"
+      },
+      "title": "DH 参数与正运动学",
+      "description": "连杆建模、变换连乘与末端位姿",
+      "level": "进阶",
+      "estimated_time": "10h",
+      "goal": "能从机械臂几何结构建立模型，并计算任意关节角对应的末端位姿。",
+      "materials": [
+        {
+          "title": "标准 DH 与改进 DH",
+          "detail": "DH 方法通过相邻关节轴建立坐标系，用四个参数描述两个坐标系之间的标准变换。"
+        },
+        {
+          "title": "关节轴、连杆参数和坐标系放置",
+          "detail": "标准 DH 与改进 DH 的坐标系附着和变换次序不同，参数不能直接混用。"
+        },
+        {
+          "title": "变换连乘与末端位姿",
+          "detail": "正运动学是逐段变换连乘；验证时要覆盖零位、典型姿态和随机姿态，并与 URDF 或仿真对照。"
+        }
+      ],
+      "pitfalls": [
+        "为得到好看的参数而错误放置关节坐标系",
+        "只验证零位，隐藏的符号和轴向错误没有暴露"
+      ],
+      "project": "为 6/7 轴机械臂建立 DH 表，并与 URDF 或仿真末端位姿对比。",
+      "acceptance": [
+        "零位和多个随机关节角误差满足设定阈值",
+        "能解释 DH 坐标系选择对参数的影响"
+      ],
+      "quiz": [
+        "DH 四个参数中哪些通常是关节变量？",
+        "正运动学为什么通常容易，而逆运动学更难？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "moveit2",
+          "title": "MoveIt 2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://moveit.picknik.ai/main/index.html",
+          "note": "机械臂建模、Planning Scene、规划与执行入口。"
+        },
+        {
+          "id": "ros2-urdf",
+          "title": "URDF 官方教程",
+          "category": "官方教程",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://docs.ros.org/en/rolling/Tutorials/Intermediate/URDF/URDF-Main.html",
+          "note": "从 link 和 joint 开始建立机器人模型。"
+        }
+      ]
+    },
+    {
+      "id": "kin-ik",
+      "track": {
+        "id": "kinematics",
+        "name": "机器人运动学",
+        "eyebrow": "MATHEMATICS"
+      },
+      "title": "逆运动学、雅可比与轨迹",
+      "description": "解析/数值 IK、速度映射、奇异点与插值",
+      "level": "进阶",
+      "estimated_time": "14h",
+      "goal": "能求解目标位姿对应的关节角，并识别不可达、关节限位与奇异问题。",
+      "materials": [
+        {
+          "title": "解析 IK 与数值 IK",
+          "detail": "解析 IK 速度快且能枚举分支，但依赖特定结构；数值 IK 通用，通过迭代减小位姿误差。"
+        },
+        {
+          "title": "Jacobian、速度映射和奇异值",
+          "detail": "Jacobian 把关节速度映射到末端速度；奇异位置会丢失某些运动方向并放大关节速度。"
+        },
+        {
+          "title": "关节空间与笛卡尔空间插值",
+          "detail": "阻尼最小二乘用小偏差换取奇异附近的稳定性，还应加入关节限位、步长和终止条件。"
+        }
+      ],
+      "pitfalls": [
+        "只判断位置误差，不处理姿态误差的表示",
+        "迭代未收敛仍返回最后一组关节角作为成功结果"
+      ],
+      "project": "实现阻尼最小二乘 IK，绘制接近奇异位形时的误差和关节速度。",
+      "acceptance": [
+        "目标可达时稳定收敛，不可达时正确退出",
+        "关节限位和奇异点不会导致速度爆炸"
+      ],
+      "quiz": [
+        "Jacobian 的每一列在几何上表示什么？",
+        "阻尼系数过大和过小分别会带来什么问题？"
+      ],
+      "resources": [
+        {
+          "id": "modern-robotics",
+          "title": "Modern Robotics",
+          "category": "开放教材",
+          "level": "核心",
+          "duration": "按章节",
+          "url": "https://modernrobotics.northwestern.edu/nu-gm-book-resource/",
+          "note": "运动学、Jacobian、轨迹与控制的系统教材和视频。"
+        },
+        {
+          "id": "moveit2",
+          "title": "MoveIt 2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://moveit.picknik.ai/main/index.html",
+          "note": "机械臂建模、Planning Scene、规划与执行入口。"
+        },
+        {
+          "id": "scipy-rotation",
+          "title": "SciPy Rotation API",
+          "category": "代码参考",
+          "level": "基础",
+          "duration": "20 分钟",
+          "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html",
+          "note": "用代码验证四元数、欧拉角和旋转矩阵互转。"
+        }
+      ]
+    },
+    {
+      "id": "emb-cpp",
+      "track": {
+        "id": "embedded",
+        "name": "嵌入式系统",
+        "eyebrow": "HARDWARE"
+      },
+      "title": "C/C++ 与 Linux 基础",
+      "description": "内存、线程、进程、系统调用与调试工具",
+      "level": "基础",
+      "estimated_time": "10h",
+      "goal": "能编写资源安全、并发可控、便于定位问题的机器人 C++ 程序。",
+      "materials": [
+        {
+          "title": "内存模型、RAII 与智能指针",
+          "detail": "RAII 把资源生命周期绑定到对象；优先使用值语义和智能指针，明确所有权后再选择共享。"
+        },
+        {
+          "title": "进程、线程、锁、条件变量",
+          "detail": "进程隔离强，线程共享地址空间；锁保护不变量，条件变量用于等待状态变化，不能靠轮询代替同步。"
+        },
+        {
+          "title": "Linux 文件、设备与网络 I/O",
+          "detail": "Linux 把设备和许多接口抽象成文件；理解 fd、阻塞模式、poll/epoll 和信号有助于写稳定驱动。"
+        }
+      ],
+      "pitfalls": [
+        "用 shared_ptr 掩盖所有权设计不清",
+        "持锁执行阻塞 I/O，导致其他线程长期无法运行"
+      ],
+      "project": "实现一个多线程数据采集程序，包含生产者消费者队列和安全退出。",
+      "acceptance": [
+        "无内存泄漏、数据竞争和悬空线程",
+        "能用调试工具定位阻塞与崩溃位置"
+      ],
+      "quiz": [
+        "unique_ptr 与 shared_ptr 的选择标准是什么？",
+        "条件变量为什么必须与条件谓词一起使用？"
+      ],
+      "resources": [
+        {
+          "id": "cpp-memory",
+          "title": "C++ Memory Library",
+          "category": "语言参考",
+          "level": "基础",
+          "duration": "35 分钟",
+          "url": "https://en.cppreference.com/cpp/memory",
+          "note": "RAII、智能指针和内存资源的权威参考。"
+        },
+        {
+          "id": "cpp-thread",
+          "title": "C++ Concurrency Support",
+          "category": "语言参考",
+          "level": "核心",
+          "duration": "45 分钟",
+          "url": "https://en.cppreference.com/w/cpp/thread.html",
+          "note": "线程、锁、条件变量和原子操作的系统索引。"
+        },
+        {
+          "id": "pthreads",
+          "title": "Linux pthreads(7)",
+          "category": "系统手册",
+          "level": "核心",
+          "duration": "30 分钟",
+          "url": "https://man7.org/linux/man-pages/man7/pthreads.7.html",
+          "note": "理解 Linux 线程共享内容、属性和 POSIX 接口。"
+        }
+      ]
+    },
+    {
+      "id": "emb-bus",
+      "track": {
+        "id": "embedded",
+        "name": "嵌入式系统",
+        "eyebrow": "HARDWARE"
+      },
+      "title": "串口、CAN 与网络协议",
+      "description": "UART/RS485、CAN/CAN FD、TCP/UDP 与帧设计",
+      "level": "核心",
+      "estimated_time": "10h",
+      "goal": "能根据物理链路和实时需求选择协议，并写出面对异常数据仍可恢复的通信层。",
+      "materials": [
+        {
+          "title": "UART、RS232、RS485 与 Modbus RTU",
+          "detail": "UART 是字节流，RS485 解决差分多点物理传输，Modbus RTU 再在其上定义地址、功能码和校验。"
+        },
+        {
+          "title": "CAN 仲裁、帧结构与 CAN FD",
+          "detail": "CAN 通过标识符仲裁并天然广播；CAN FD 扩大载荷和数据段速率，但节点兼容性必须确认。"
+        },
+        {
+          "title": "TCP/UDP 粘包、重连与心跳",
+          "detail": "TCP 保证有序字节流但没有消息边界，UDP 保留报文但不保证到达；应用层仍需序列号、超时和状态机。"
+        }
+      ],
+      "pitfalls": [
+        "认为一次 TCP recv 就对应一帧完整消息",
+        "只处理正确帧，没有丢字节后的重新同步策略"
+      ],
+      "project": "设计统一传感器协议适配层，兼容串口、CAN、TCP 和 UDP。",
+      "acceptance": [
+        "支持校验、超时、断线重连和错误统计",
+        "协议解析面对半包、错帧和突发流量仍稳定"
+      ],
+      "quiz": [
+        "RS485、Modbus RTU 和串口之间是什么关系？",
+        "CAN 总线高优先级报文过多会发生什么？"
+      ],
+      "resources": [
+        {
+          "id": "modbus",
+          "title": "Modbus Serial Line Specification",
+          "category": "协议规范",
+          "level": "核心",
+          "duration": "45 分钟",
+          "url": "https://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf",
+          "note": "RS485 上 Modbus RTU 的帧、时序和物理层规范。"
+        },
+        {
+          "id": "canfd",
+          "title": "Bosch CAN FD Specification",
+          "category": "协议规范",
+          "level": "进阶",
+          "duration": "45 分钟",
+          "url": "https://www.bosch-semiconductors.com/media/ip_modules/pdf_2/papers/can_fd_spec.pdf",
+          "note": "直接阅读 CAN FD 帧格式、位时序和错误处理。"
+        },
+        {
+          "id": "kernel-drivers",
+          "title": "Linux Driver API",
+          "category": "官方文档",
+          "level": "进阶",
+          "duration": "按章节",
+          "url": "https://docs.kernel.org/driver-api/index.html",
+          "note": "Linux 设备模型、总线、I/O 与驱动接口入口。"
+        }
+      ]
+    },
+    {
+      "id": "emb-rtos",
+      "track": {
+        "id": "embedded",
+        "name": "嵌入式系统",
+        "eyebrow": "HARDWARE"
+      },
+      "title": "MCU、RTOS 与实时性",
+      "description": "中断、任务调度、锁、队列与时序预算",
+      "level": "核心",
+      "estimated_time": "10h",
+      "goal": "能为实时任务分配优先级和通信机制，并证明关键任务在最坏情况下仍按时完成。",
+      "materials": [
+        {
+          "title": "中断、任务和优先级",
+          "detail": "中断只做必须的快速响应，把耗时处理转交任务；任务优先级应反映截止时间和阻塞关系。"
+        },
+        {
+          "title": "互斥锁、信号量、队列与事件组",
+          "detail": "互斥锁保护共享资源，信号量表示资源计数，队列传递数据和所有权，事件组适合组合状态通知。"
+        },
+        {
+          "title": "周期、抖动、截止时间和优先级反转",
+          "detail": "实时性关注最坏延迟而非平均速度；需要估算 WCET、阻塞时间、抖动和 CPU 利用率。"
+        }
+      ],
+      "pitfalls": [
+        "在高优先级任务中打印大量日志",
+        "所有任务优先级凭经验设置，没有测量最坏执行时间"
+      ],
+      "project": "设计 1 kHz 控制任务、100 Hz 采集任务和低优先级日志任务的调度方案。",
+      "acceptance": [
+        "最坏执行时间满足截止时间",
+        "共享资源不会导致不可控的优先级反转"
+      ],
+      "quiz": [
+        "中断服务函数中为什么不应执行复杂业务？",
+        "优先级反转如何产生，常见解决方法是什么？"
+      ],
+      "resources": [
+        {
+          "id": "freertos",
+          "title": "FreeRTOS Documentation",
+          "category": "官方文档",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://www.freertos.org/Documentation/RTOS_book.html",
+          "note": "任务、队列、信号量和实时调度的官方学习资料。"
+        },
+        {
+          "id": "cpp-thread",
+          "title": "C++ Concurrency Support",
+          "category": "语言参考",
+          "level": "核心",
+          "duration": "45 分钟",
+          "url": "https://en.cppreference.com/w/cpp/thread.html",
+          "note": "线程、锁、条件变量和原子操作的系统索引。"
+        },
+        {
+          "id": "pthreads",
+          "title": "Linux pthreads(7)",
+          "category": "系统手册",
+          "level": "核心",
+          "duration": "30 分钟",
+          "url": "https://man7.org/linux/man-pages/man7/pthreads.7.html",
+          "note": "理解 Linux 线程共享内容、属性和 POSIX 接口。"
+        }
+      ]
+    },
+    {
+      "id": "emb-driver",
+      "track": {
+        "id": "embedded",
+        "name": "嵌入式系统",
+        "eyebrow": "HARDWARE"
+      },
+      "title": "传感器与驱动开发",
+      "description": "设备抽象、采集线程、滤波、标定与发布",
+      "level": "工程",
+      "estimated_time": "12h",
+      "goal": "能把不稳定的硬件链路封装成稳定、可观测、可替换的软件接口。",
+      "materials": [
+        {
+          "title": "HAL、设备抽象与驱动状态机",
+          "detail": "HAL 隔离平台差异，协议层解析帧，设备层维护连接和配置状态，发布层把数据转换为系统接口。"
+        },
+        {
+          "title": "采集频率、缓存、滤波与标定",
+          "detail": "采集线程要有明确周期、缓存边界和退出机制；滤波参数必须与采样频率匹配，标定参数要可追溯。"
+        },
+        {
+          "title": "线程安全发布与硬件错误映射",
+          "detail": "硬件错误不能只打印日志，应映射成诊断状态、错误码和恢复动作，并统计连续失败与累计失败。"
+        }
+      ],
+      "pitfalls": [
+        "把串口读取、协议解析和业务发布写在同一个无限循环",
+        "设备重连后没有重新下发配置和验证版本"
+      ],
+      "project": "实现 IMU 或力传感器驱动节点，输出原始值、滤波值和诊断状态。",
+      "acceptance": [
+        "频率、延迟、漂移和异常恢复可量化",
+        "拔插、乱码和设备重启不会拖垮主进程"
+      ],
+      "quiz": [
+        "驱动层应该向上层暴露原始错误还是统一错误码？",
+        "如何判断丢帧发生在硬件、驱动还是发布环节？"
+      ],
+      "resources": [
+        {
+          "id": "kernel-drivers",
+          "title": "Linux Driver API",
+          "category": "官方文档",
+          "level": "进阶",
+          "duration": "按章节",
+          "url": "https://docs.kernel.org/driver-api/index.html",
+          "note": "Linux 设备模型、总线、I/O 与驱动接口入口。"
+        },
+        {
+          "id": "hardware-components",
+          "title": "ros2_control Hardware Components",
+          "category": "官方文档",
+          "level": "进阶",
+          "duration": "35 分钟",
+          "url": "https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/hardware_components_userdoc.html",
+          "note": "面向真实设备实现硬件组件的直接参考。"
+        },
+        {
+          "id": "isaac-ros",
+          "title": "NVIDIA Isaac ROS Nova",
+          "category": "官方代码",
+          "level": "工程",
+          "duration": "45 分钟",
+          "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nova",
+          "note": "参考 Jetson 上多传感器、时间同步与硬件加速集成。"
+        }
+      ]
+    },
+    {
+      "id": "emb-reliable",
+      "track": {
+        "id": "embedded",
+        "name": "嵌入式系统",
+        "eyebrow": "HARDWARE"
+      },
+      "title": "边缘部署与可靠性",
+      "description": "Jetson、服务守护、监控、日志与故障恢复",
+      "level": "工程",
+      "estimated_time": "8h",
+      "goal": "能让机器人服务在边缘设备上长期运行，并在崩溃、断电和升级失败后可恢复。",
+      "materials": [
+        {
+          "title": "Jetson/边缘设备部署",
+          "detail": "部署包要固定依赖、配置和模型版本，区分只读程序、可变配置、数据与日志目录。"
+        },
+        {
+          "title": "systemd、容器、日志轮转与监控",
+          "detail": "systemd 管理进程生命周期，健康检查判断服务是否真正可用，日志轮转防止磁盘耗尽。"
+        },
+        {
+          "title": "健康检查、看门狗、升级和回滚",
+          "detail": "升级需要版本校验、兼容性检查、原子切换和回滚；故障恢复后要保留导致异常的上下文。"
+        }
+      ],
+      "pitfalls": [
+        "进程仍在就认为服务健康",
+        "日志无限增长，最终使磁盘写满导致全系统异常"
+      ],
+      "project": "将 ROS 2 采集服务部署为开机启动服务，并模拟进程崩溃和设备断连。",
+      "acceptance": [
+        "服务可自动恢复且保留关键故障上下文",
+        "资源占用、版本和运行状态可远程查询"
+      ],
+      "quiz": [
+        "进程存活检查与业务健康检查有什么区别？",
+        "怎样设计升级过程才能在断电后仍保持可启动？"
+      ],
+      "resources": [
+        {
+          "id": "jetson",
+          "title": "Jetson Linux Developer Guide",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "按主题",
+          "url": "https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/index.html",
+          "note": "JetPack 6 / L4T 36.4.3 的部署、性能和系统参考。"
+        },
+        {
+          "id": "systemd-service",
+          "title": "systemd.service",
+          "category": "官方手册",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html",
+          "note": "设计服务启动、重启、依赖和失败策略。"
+        },
+        {
+          "id": "rep-quality",
+          "title": "REP-2004 软件质量规范",
+          "category": "规范",
+          "level": "工程",
+          "duration": "25 分钟",
+          "url": "https://www.ros.org/reps/rep-2004.html",
+          "note": "用于建立测试、质量等级与工程交付标准。"
+        }
+      ]
+    },
+    {
+      "id": "llm-base",
+      "track": {
+        "id": "llm",
+        "name": "大模型与具身智能",
+        "eyebrow": "INTELLIGENCE"
+      },
+      "title": "Transformer 与模型基础",
+      "description": "Token、Attention、上下文、训练与推理",
+      "level": "基础",
+      "estimated_time": "8h",
+      "goal": "能解释大模型推理的关键结构和资源消耗，不把模型能力简单归因于参数量。",
+      "materials": [
+        {
+          "title": "Token、Embedding 与位置编码",
+          "detail": "Token 是模型处理的离散单元，Embedding 把它映射为向量；位置编码让注意力知道顺序。"
+        },
+        {
+          "title": "Self-Attention 与 Transformer",
+          "detail": "Q 表示当前元素寻找什么，K 表示元素提供什么索引，V 表示实际聚合的信息；注意力按相关性加权。"
+        },
+        {
+          "title": "预训练、指令微调、推理与上下文窗口",
+          "detail": "预训练学习通用模式，指令微调塑造交互行为；推理时上下文和 KV Cache 决定显存与响应速度。"
+        }
+      ],
+      "pitfalls": [
+        "把 Token 数量等同于字符数量",
+        "只看模型参数显存，忽略长上下文的 KV Cache"
+      ],
+      "project": "用小规模代码演示 Attention，并观察不同上下文长度的显存和速度变化。",
+      "acceptance": [
+        "能解释 Q/K/V 和注意力权重",
+        "能区分参数量、激活显存、KV Cache 和吞吐"
+      ],
+      "quiz": [
+        "Self-Attention 为什么能并行处理输入序列？",
+        "上下文长度增加时推理成本主要如何变化？"
+      ],
+      "resources": [
+        {
+          "id": "attention-paper",
+          "title": "Attention Is All You Need",
+          "category": "原始论文",
+          "level": "核心",
+          "duration": "60 分钟",
+          "url": "https://arxiv.org/abs/1706.03762",
+          "note": "Transformer 与 Self-Attention 的原始论文。"
+        },
+        {
+          "id": "qwen3",
+          "title": "Qwen3",
+          "category": "官方代码",
+          "level": "核心",
+          "duration": "35 分钟",
+          "url": "https://github.com/QwenLM/Qwen3",
+          "note": "Qwen 模型能力、部署示例和生态入口。"
+        },
+        {
+          "id": "vllm",
+          "title": "vLLM Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "60 分钟",
+          "url": "https://docs.vllm.ai/en/latest/",
+          "note": "部署、并行、量化、OpenAI API 和性能调优。"
+        }
+      ]
+    },
+    {
+      "id": "llm-serving",
+      "track": {
+        "id": "llm",
+        "name": "大模型与具身智能",
+        "eyebrow": "INTELLIGENCE"
+      },
+      "title": "本地模型与 vLLM",
+      "description": "Qwen/Qwen-VL、量化、吞吐、显存与服务化",
+      "level": "核心",
+      "estimated_time": "10h",
+      "goal": "能部署并测量本地大模型服务，在显存、吞吐、延迟和稳定性之间做工程权衡。",
+      "materials": [
+        {
+          "title": "Qwen/Qwen-VL 模型与量化",
+          "detail": "量化降低权重显存与带宽，但不同算法对速度和精度影响不同；视觉模型还要考虑图像编码器。"
+        },
+        {
+          "title": "vLLM 调度、PagedAttention 与连续批处理",
+          "detail": "vLLM 用 PagedAttention 管理 KV Cache，用连续批处理动态合并请求，提高 GPU 利用率。"
+        },
+        {
+          "title": "张量并行、吞吐、首 Token 延迟",
+          "detail": "TTFT 衡量首字等待，TPS 衡量生成速度；并发提高总吞吐但会增加排队和单请求延迟。"
+        }
+      ],
+      "pitfalls": [
+        "只做单请求测速，无法反映真实服务能力",
+        "显存刚好装满模型，没有为 KV Cache 和峰值保留空间"
+      ],
+      "project": "在本地 GPU 部署 OpenAI 兼容服务，并完成并发、显存和稳定性压测。",
+      "acceptance": [
+        "给出不同并发度的 TTFT、TPS 和显存报告",
+        "服务具备超时、限流、健康检查和自动重启"
+      ],
+      "quiz": [
+        "吞吐量和单请求延迟为什么可能同时变差或互相冲突？",
+        "张量并行何时能提升性能，何时只增加通信开销？"
+      ],
+      "resources": [
+        {
+          "id": "vllm",
+          "title": "vLLM Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "60 分钟",
+          "url": "https://docs.vllm.ai/en/latest/",
+          "note": "部署、并行、量化、OpenAI API 和性能调优。"
+        },
+        {
+          "id": "qwen3",
+          "title": "Qwen3",
+          "category": "官方代码",
+          "level": "核心",
+          "duration": "35 分钟",
+          "url": "https://github.com/QwenLM/Qwen3",
+          "note": "Qwen 模型能力、部署示例和生态入口。"
+        },
+        {
+          "id": "jetson",
+          "title": "Jetson Linux Developer Guide",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "按主题",
+          "url": "https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/index.html",
+          "note": "JetPack 6 / L4T 36.4.3 的部署、性能和系统参考。"
+        }
+      ]
+    },
+    {
+      "id": "llm-rag",
+      "track": {
+        "id": "llm",
+        "name": "大模型与具身智能",
+        "eyebrow": "INTELLIGENCE"
+      },
+      "title": "RAG 与知识工程",
+      "description": "切分、向量检索、重排、GraphRAG 与评测",
+      "level": "核心",
+      "estimated_time": "10h",
+      "goal": "能构建可评测、可引用、能定位失败环节的知识问答系统。",
+      "materials": [
+        {
+          "title": "文档解析、切分和元数据",
+          "detail": "解析先保留标题、章节、表格和来源元数据；切分要围绕语义完整性与检索粒度权衡。"
+        },
+        {
+          "title": "向量检索、混合检索与重排",
+          "detail": "向量检索擅长语义相近，关键词检索擅长专有名词和编号，重排器再对候选做精细相关性判断。"
+        },
+        {
+          "title": "GraphRAG、引用、评测和幻觉控制",
+          "detail": "评测要分开衡量检索召回、引用准确和答案正确；GraphRAG 适合关系密集、需要跨文档推理的知识。"
+        }
+      ],
+      "pitfalls": [
+        "切分后丢失文档标题和章节路径",
+        "答案看似合理就认为 RAG 成功，没有核对引用是否支持结论"
+      ],
+      "project": "构建 ROS 2 项目文档 RAG，回答问题时返回准确章节来源。",
+      "acceptance": [
+        "建立可重复的检索与答案评测集",
+        "错误答案能区分检索失败和生成失败"
+      ],
+      "quiz": [
+        "什么时候混合检索明显优于纯向量检索？",
+        "如何区分没有检索到证据与模型忽略了证据？"
+      ],
+      "resources": [
+        {
+          "id": "rag-paper",
+          "title": "Retrieval-Augmented Generation",
+          "category": "原始论文",
+          "level": "核心",
+          "duration": "45 分钟",
+          "url": "https://arxiv.org/abs/2005.11401",
+          "note": "理解参数记忆与外部检索结合的原始设计。"
+        },
+        {
+          "id": "graphrag",
+          "title": "Microsoft GraphRAG",
+          "category": "官方代码",
+          "level": "进阶",
+          "duration": "45 分钟",
+          "url": "https://github.com/microsoft/graphrag",
+          "note": "图结构索引、社区摘要和全局检索实现。"
+        },
+        {
+          "id": "qwen3",
+          "title": "Qwen3",
+          "category": "官方代码",
+          "level": "核心",
+          "duration": "35 分钟",
+          "url": "https://github.com/QwenLM/Qwen3",
+          "note": "Qwen 模型能力、部署示例和生态入口。"
+        }
+      ]
+    },
+    {
+      "id": "llm-agent",
+      "track": {
+        "id": "llm",
+        "name": "大模型与具身智能",
+        "eyebrow": "INTELLIGENCE"
+      },
+      "title": "MCP、工具调用与 Agent",
+      "description": "工具协议、Registry、工作流、记忆与可观测性",
+      "level": "工程",
+      "estimated_time": "12h",
+      "goal": "能设计受约束、可追踪的 Agent，让模型可靠选择工具而不是直接执行不可控动作。",
+      "materials": [
+        {
+          "title": "Tool Calling 与结构化输出",
+          "detail": "工具描述要清楚输入、输出、前置条件和副作用；结构化参数必须经过类型和业务规则校验。"
+        },
+        {
+          "title": "MCP、Registry、工作流和状态",
+          "detail": "MCP 统一模型与工具的发现和调用，Registry 管理能力，工作流负责确定性流程，模型只处理需要判断的部分。"
+        },
+        {
+          "title": "记忆、权限、追踪与失败恢复",
+          "detail": "记忆保存长期有用信息，状态保存当前任务进度；每次计划、调用、结果和错误都应形成可审计轨迹。"
+        }
+      ],
+      "pitfalls": [
+        "把所有流程都交给模型自由规划，缺少确定性边界",
+        "工具调用失败后无限重试或悄悄换参数"
+      ],
+      "project": "实现一个机器人开发 Agent：查询 Topic、读取诊断并生成可审查的处理计划。",
+      "acceptance": [
+        "工具参数经过校验，危险动作需要明确授权",
+        "每次调用、结果和失败原因均可追踪"
+      ],
+      "quiz": [
+        "哪些机器人动作必须在工具层再次校验，而不能信任模型参数？",
+        "工作流与 Agent 自主规划应该如何分工？"
+      ],
+      "resources": [
+        {
+          "id": "mcp",
+          "title": "Model Context Protocol",
+          "category": "协议规范",
+          "level": "工程",
+          "duration": "45 分钟",
+          "url": "https://modelcontextprotocol.io/specification/latest",
+          "note": "理解 MCP 架构、生命周期、工具和资源协议。"
+        },
+        {
+          "id": "graphrag",
+          "title": "Microsoft GraphRAG",
+          "category": "官方代码",
+          "level": "进阶",
+          "duration": "45 分钟",
+          "url": "https://github.com/microsoft/graphrag",
+          "note": "图结构索引、社区摘要和全局检索实现。"
+        },
+        {
+          "id": "ros2-design",
+          "title": "ROS 2 Design",
+          "category": "官方设计",
+          "level": "进阶",
+          "duration": "30 分钟",
+          "url": "https://design.ros2.org/",
+          "note": "从设计文档理解 ROS 2 为什么这样实现。"
+        }
+      ]
+    },
+    {
+      "id": "llm-vla",
+      "track": {
+        "id": "llm",
+        "name": "大模型与具身智能",
+        "eyebrow": "INTELLIGENCE"
+      },
+      "title": "VLM、VLA 与机器人 Skills",
+      "description": "视觉理解、高/低精任务分流、技能调度与闭环",
+      "level": "前沿",
+      "estimated_time": "14h",
+      "goal": "能设计模型决策与高精度工具协作的具身系统，并用闭环指标验证真实任务能力。",
+      "materials": [
+        {
+          "title": "VLM 感知、VLA 策略与动作表示",
+          "detail": "VLM 理解图像和语言，VLA 把观测映射为动作；任务分解、坐标精度和安全约束通常仍需工程模块补强。"
+        },
+        {
+          "title": "高精任务的工具测量与低精任务端到端策略",
+          "detail": "低精度、容错高的动作可用端到端策略；高精度任务应调用检测、测量、标定、规划和伺服技能。"
+        },
+        {
+          "title": "技能选择、闭环验证和安全边界",
+          "detail": "模型选择技能，执行层施加速度、碰撞和工作空间约束，感知层验证结果；失败必须反馈给决策层重新规划。"
+        }
+      ],
+      "pitfalls": [
+        "把 VLA 输出直接发送给执行器，绕过安全控制",
+        "只展示一次成功案例，不统计精度、成功率和失败分布"
+      ],
+      "project": "设计 VLA + 视觉测量 + MoveIt 2 的抓取闭环，按精度要求动态选择执行路径。",
+      "acceptance": [
+        "决策层不直接绕过运动和安全约束",
+        "成功率、定位误差、耗时和失败类型都有量化结果"
+      ],
+      "quiz": [
+        "什么指标可以判断任务应该走端到端策略还是高精度工具链？",
+        "VLA 闭环中哪一层负责确认动作确实达到目标？"
+      ],
+      "resources": [
+        {
+          "id": "openvla",
+          "title": "OpenVLA",
+          "category": "官方代码",
+          "level": "前沿",
+          "duration": "60 分钟",
+          "url": "https://github.com/openvla/openvla",
+          "note": "开源 VLA 模型、推理、微调和机器人数据入口。"
+        },
+        {
+          "id": "rt2",
+          "title": "RT-2: Vision-Language-Action Models",
+          "category": "原始论文",
+          "level": "前沿",
+          "duration": "60 分钟",
+          "url": "https://arxiv.org/abs/2307.15818",
+          "note": "理解将动作表示为 Token 的 VLA 路线。"
+        },
+        {
+          "id": "moveit2",
+          "title": "MoveIt 2 Documentation",
+          "category": "官方文档",
+          "level": "工程",
+          "duration": "90 分钟",
+          "url": "https://moveit.picknik.ai/main/index.html",
+          "note": "机械臂建模、Planning Scene、规划与执行入口。"
+        }
+      ]
+    }
+  ]
+}

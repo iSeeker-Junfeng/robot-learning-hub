@@ -4,15 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "content:export": "node scripts/export-knowledge.mjs",
     "dev": "vinext dev",
-    "build": "vinext build && node scripts/prepare-hosting.mjs",
+    "dev:frontend": "vinext dev",
+    "build": "npm run content:export && vinext build && node scripts/prepare-hosting.mjs",
     "start": "vinext start"
   },
   "dependencies": {
+    "katex": "^0.16.47",
     "next": "16.2.10",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "react-markdown": "^10.1.0",
     "react-server-dom-webpack": "19.2.6",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "vinext": "1.0.0-beta.1"
   },
   "devDependencies": {

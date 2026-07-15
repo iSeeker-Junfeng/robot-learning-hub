@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapterById, chapterGuides, chapterLessons, chapterResources, graphEdges, graphNodes, resourceCatalog, tracks } from "./data";
+import AIAssistant from "./components/AIAssistant";
 
 const STORAGE_KEY = "robot-learning-hub-progress-v1";
 const STUDY_KEY = "robot-learning-hub-study-checks-v1";
@@ -47,6 +48,8 @@ export default function Home() {
   const [graphFilter, setGraphFilter] = useState("all");
   const [focusedNode, setFocusedNode] = useState("kin-transform");
   const [selectedChapter, setSelectedChapter] = useState(null);
+  const [assistantChapter, setAssistantChapter] = useState(null);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const importRef = useRef(null);
 
@@ -119,6 +122,11 @@ export default function Home() {
     document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function openAssistant(chapterId = null) {
+    setAssistantChapter(chapterId || selectedChapter || focusedNode || null);
+    setAssistantOpen(true);
+  }
+
   function exportProgress() {
     const payload = { version: 3, exportedAt: new Date().toISOString(), progress, studyChecks, resourceReads };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
@@ -178,6 +186,7 @@ export default function Home() {
         <nav aria-label="主导航">
           <a href="#roadmap">学习路线</a>
           <a href="#knowledge">知识图谱</a>
+          <button type="button" className="nav-ai" onClick={() => openAssistant()}>问玄枢</button>
         </nav>
         <div className="top-actions">
           <button type="button" onClick={exportProgress}>导出进度</button>
@@ -380,7 +389,7 @@ export default function Home() {
           <section className="chapter-sheet" role="dialog" aria-modal="true" aria-labelledby="chapter-sheet-title" style={{ "--track": selected.track.color }}>
             <div className="sheet-head">
               <div><span>{selected.track.eyebrow} / {selected.no}</span><h2 id="chapter-sheet-title">{selected.title}</h2></div>
-              <button type="button" className="sheet-close" onClick={() => setSelectedChapter(null)} aria-label="关闭章节详情">×</button>
+              <div className="sheet-head-actions"><button type="button" className="ask-ai" onClick={() => openAssistant(selected.id)}><i></i>问玄枢</button><button type="button" className="sheet-close" onClick={() => setSelectedChapter(null)} aria-label="关闭章节详情">×</button></div>
             </div>
             <p className="sheet-intro">{selected.desc}</p>
             <div className="learning-goal">
@@ -460,6 +469,13 @@ export default function Home() {
         <p>持续学习的关键，不是收藏更多知识，而是让知识之间真正连接。</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
+      <button type="button" className="ai-fab" onClick={() => openAssistant()} aria-label="打开玄枢 AI 助教"><span>玄</span><i></i><em>问玄枢</em></button>
+      <AIAssistant
+        open={assistantOpen}
+        onClose={() => setAssistantOpen(false)}
+        chapter={assistantChapter ? chapterById[assistantChapter] : null}
+        lesson={assistantChapter ? chapterLessons[assistantChapter] : null}
+      />
       {notice && <div className="toast" role="status">{notice}</div>}
     </main>
   );
