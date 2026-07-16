@@ -3,5 +3,13 @@ dist/
 out/
 node_modules/
 next-env.d.ts
+.env
+backend/.env
+backend/.venv/
+__pycache__/
+.pytest_cache/
+.vinext/
 *.log
 .DS_Store
+data/
+*.egg-info/
