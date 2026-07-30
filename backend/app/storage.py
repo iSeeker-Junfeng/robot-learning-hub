@@ -77,6 +77,29 @@ class Storage:
 
                 CREATE INDEX IF NOT EXISTS idx_learning_records_client
                     ON learning_records(client_id, record_type, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS robot_models (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL UNIQUE,
+                    description TEXT NOT NULL DEFAULT '',
+                    urdf_file TEXT NOT NULL,
+                    storage_path TEXT NOT NULL,
+                    root_link TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS robot_connections (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    adapter TEXT NOT NULL,
+                    endpoint TEXT NOT NULL,
+                    config_json TEXT NOT NULL,
+                    enabled INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
                 """
             )
 
@@ -205,6 +228,73 @@ class Storage:
                 "DELETE FROM learning_records WHERE id = ? AND client_id = ?", (record_id, client_id)
             )
             return bool(cursor.rowcount)
+
+    @staticmethod
+    def _robot_model(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "description": row["description"],
+            "urdf_file": row["urdf_file"],
+            "storage_path": row["storage_path"],
+            "root_link": row["root_link"],
+            "metadata": json.loads(row["metadata_json"]),
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
+
+    def create_robot_model(
+        self,
+        model_id: str,
+        name: str,
+        description: str,
+        urdf_file: str,
+        storage_path: str,
+        root_link: str,
+        metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        now = utc_now()
+        try:
+            with self.connect() as connection:
+                connection.execute(
+                    """INSERT INTO robot_models(
+                        id, name, description, urdf_file, storage_path, root_link,
+                        metadata_json, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        model_id,
+                        name,
+                        description,
+                        urdf_file,
+                        storage_path,
+                        root_link,
+                        json.dumps(metadata, ensure_ascii=False),
+                        now,
+                        now,
+                    ),
+                )
+                row = connection.execute("SELECT * FROM robot_models WHERE id = ?", (model_id,)).fetchone()
+        except sqlite3.IntegrityError as exc:
+            raise StorageError("机器人模型名称已存在") from exc
+        return self._robot_model(row)
+
+    def list_robot_models(self) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute("SELECT * FROM robot_models ORDER BY updated_at DESC").fetchall()
+        return [self._robot_model(row) for row in rows]
+
+    def get_robot_model(self, model_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute("SELECT * FROM robot_models WHERE id = ?", (model_id,)).fetchone()
+        return self._robot_model(row) if row else None
+
+    def delete_robot_model(self, model_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute("SELECT * FROM robot_models WHERE id = ?", (model_id,)).fetchone()
+            if not row:
+                return None
+            connection.execute("DELETE FROM robot_models WHERE id = ?", (model_id,))
+        return self._robot_model(row)
 
 
 storage = Storage(settings.database_path, settings.settings_encryption_key)
