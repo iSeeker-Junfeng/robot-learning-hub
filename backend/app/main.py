@@ -15,6 +15,7 @@ from .knowledge import get_knowledge_base
 from .llm import LLMConfigurationError, OpenAICompatibleProvider
 from .schemas import ChatRequest, FeedbackRequest, LearningRecordCreate, LearningRecordUpdate, LLMSettingsUpdate
 from .storage import StorageError, storage
+from .routers.robot_models import router as robot_models_router
 
 logger = logging.getLogger("xuanshu.api")
 app = FastAPI(title="XUANSHU AI Learning API", version="0.1.0")
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(robot_models_router)
 
 
 def require_admin_token(x_admin_token: str = Header(default="")) -> None:

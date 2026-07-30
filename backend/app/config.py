@@ -28,8 +28,12 @@ class Settings:
     llm_timeout_seconds: float = float(os.getenv("LLM_TIMEOUT_SECONDS", "90"))
     max_history_messages: int = int(os.getenv("MAX_HISTORY_MESSAGES", "12"))
     max_question_length: int = int(os.getenv("MAX_QUESTION_LENGTH", "4000"))
-    knowledge_path: str = os.getenv("KNOWLEDGE_PATH", "content/knowledge.json")
+    knowledge_path: str = os.getenv("KNOWLEDGE_PATH", "frontend/content/knowledge.json")
     database_path: str = os.getenv("DATABASE_PATH", "data/xuanshu.db")
+    robot_model_storage_path: str = os.getenv("ROBOT_MODEL_STORAGE_PATH", "data/robot-models")
+    robot_upload_max_bytes: int = int(os.getenv("ROBOT_UPLOAD_MAX_BYTES", str(50 * 1024 * 1024)))
+    robot_extract_max_bytes: int = int(os.getenv("ROBOT_EXTRACT_MAX_BYTES", str(200 * 1024 * 1024)))
+    robot_archive_max_files: int = int(os.getenv("ROBOT_ARCHIVE_MAX_FILES", "2000"))
     admin_token: str = os.getenv("ADMIN_TOKEN", "")
     settings_encryption_key: str = os.getenv("SETTINGS_ENCRYPTION_KEY", "")
 

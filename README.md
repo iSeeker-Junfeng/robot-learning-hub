@@ -4,14 +4,16 @@
 
 ## 架构
 
-- `app/`：React 前端，负责学习路线、章节、进度、精选资料和“问玄枢”交互。
+- `frontend/`：完整的 React/Vinext 前端工程，包含源码、Node 配置、构建脚本和前端知识快照。
 - `backend/`：独立 FastAPI 服务，负责知识检索、提示词组装、模型调用与 SQLite 数据访问。
-- `content/knowledge.json`：由前端课程数据生成的后端知识快照，避免前后端各维护一份课程内容。
+- `frontend/app/lab/robot-simulator/`：通用 URDF 机器人仿真实验室，提供运动树、关节控制和 Link 位姿查看。
+- `frontend/content/knowledge.json`：由前端课程数据生成的后端知识快照，避免前后端各维护一份课程内容。
 - 模型服务通过 OpenAI 兼容协议接入，默认使用阿里云百炼 DashScope，也可以替换为其他兼容服务。
 
 ## 本地运行
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
@@ -49,6 +51,7 @@ uvicorn app.main:app --reload --port 8888
 另一个终端启动前端：
 
 ```bash
+cd frontend
 cp .env.example .env
 npm run dev
 ```
@@ -66,7 +69,7 @@ Docker Compose 会把 SQLite 文件保存在项目的 `data/` 目录，并挂载
 
 ## 内容维护
 
-- 路线、章节与知识图谱数据集中在 `app/data.js`。
+- 路线、章节与知识图谱数据集中在 `frontend/app/data.js`。
 - `chapterGuides` 保存学习重点、工程练习和验收标准。
 - `chapterLessons` 保存学习目标、分步讲解、常见误区和自测问题。
 - `resourceCatalog` 是可复用的精选资料目录，保存分类、难度、阅读时长、链接与推荐说明。
@@ -75,7 +78,7 @@ Docker Compose 会把 SQLite 文件保存在项目的 `data/` 目录，并挂载
 - 章节状态、分步学习记录和资料已读状态目前保存在浏览器 `localStorage`，也可以在页面右上角导出或导入 JSON 备份。
 - SQLite 已提供通用学习记录 CRUD，可保存章节进度、资料已读、笔记和问答记录等 JSON 数据。后续接入账号系统时可以把现有浏览器记录迁移到该接口，而不需要调整数据库表结构。
 - AI 对话按章节保存在浏览器中；问题会携带当前章节、路线与学习目标，但不会携带模型密钥。
-- 修改课程数据后运行 `npm run content:export`，即可更新 FastAPI 使用的知识快照；生产构建会自动执行此步骤。
+- 在 `frontend/` 中运行 `npm run content:export`，即可更新 FastAPI 使用的知识快照；生产构建会自动执行此步骤。
 
 ## AI API
 
@@ -92,9 +95,24 @@ Docker Compose 会把 SQLite 文件保存在项目的 `data/` 目录，并挂载
 
 SQLite 表由后端首次启动时自动创建。`app_settings` 存储运行时配置，`learning_records` 使用 `client_id + record_type + record_key` 唯一约束，避免同一学习对象产生重复记录。
 
+## 机器人仿真实验室
+
+打开 `/lab/robot-simulator` 可直接加载内置教学机械臂。启动 FastAPI 后，还可以上传单个 `.urdf` 或包含 Mesh/Texture 的 `.zip` 资源包。后端会校验文件大小、类型、路径穿越、符号链接、异常压缩比、XML 实体和单根运动树，再保存模型。
+
+- `POST /api/v1/robot-models`：上传 URDF/ZIP。
+- `GET /api/v1/robot-models`：模型列表。
+- `GET /api/v1/robot-models/{id}`：模型结构元数据。
+- `GET /api/v1/robot-models/{id}/urdf`：处理后的 URDF。
+- `GET /api/v1/robot-models/{id}/assets/{path}`：模型静态资源。
+- `DELETE /api/v1/robot-models/{id}`：删除模型及资源。
+
+模型文件默认保存在 `backend/data/robot-models`（取决于后端启动目录），可通过 `ROBOT_MODEL_STORAGE_PATH` 调整。
+
 ## 验证
 
 ```bash
+cd frontend
 npm run build
-cd backend && pytest
+cd ../backend
+pytest
 ```
