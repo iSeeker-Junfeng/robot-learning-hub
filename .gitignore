@@ -3,12 +3,14 @@ dist/
 out/
 node_modules/
 .npm-cache/
+.pip-cache/
 next-env.d.ts
 .env
 backend/.env
 backend/.venv/
 __pycache__/
 .pytest_cache/
+backend/.pytest-tmp*/
 .vinext/
 *.log
 .DS_Store

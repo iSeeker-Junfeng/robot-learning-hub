@@ -87,7 +87,7 @@ URDF 应当构成单根运动树。多机器人场景在后续版本中通过多
 ### 4.2 前端目录
 
 ```text
-app/
+frontend/app/
 ├── page.jsx
 ├── lab/
 │   └── robot-simulator/
@@ -147,6 +147,7 @@ backend/app/
 前端增加：
 
 ```bash
+cd frontend
 npm install three urdf-loader roslib
 ```
 

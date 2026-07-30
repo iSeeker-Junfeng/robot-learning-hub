@@ -188,6 +188,7 @@ export default function Home() {
         <nav aria-label="主导航">
           <a href="#roadmap">学习路线</a>
           <a href="#knowledge">知识图谱</a>
+          <a href="/lab/robot-simulator">仿真实验室</a>
           <button type="button" className="nav-ai" onClick={() => openAssistant()}>问玄枢</button>
         </nav>
         <div className="top-actions">
@@ -205,6 +206,7 @@ export default function Home() {
           <p>机器人、ROS 2、运动学、嵌入式与大模型不是五门孤立的课程，而是一条完整的工程链路。这是你的长期学习坐标系。</p>
           <div className="hero-cta">
             <button type="button" className="primary" onClick={() => jumpToTrack("ros2")}>继续学习 ROS 2 <ArrowIcon /></button>
+            <a className="lab-entry" href="/lab/robot-simulator">进入机器人仿真实验室 <ArrowIcon /></a>
             <a href="#knowledge">查看知识关系 <span>↓</span></a>
           </div>
           <div className="hero-stats">
