@@ -20,7 +20,7 @@ npm run dev
 
 ## 启动 AI 后端
 
-需要 Python 3.11 或更高版本：
+需要 Python 3.10 或更高版本：
 
 ```bash
 cd backend
