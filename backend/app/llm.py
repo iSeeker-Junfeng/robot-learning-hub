@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import json
 from collections.abc import AsyncIterator
+from contextlib import aclosing
 
 import httpx
+from langchain_openai import ChatOpenAI
 
 from .config import settings
 from .storage import RuntimeLLMConfig
@@ -13,36 +14,34 @@ class LLMConfigurationError(RuntimeError):
     pass
 
 
-class OpenAICompatibleProvider:
+class LangChainProvider:
+    """Stream text from an OpenAI-compatible endpoint through LangChain."""
+
     def __init__(self, config: RuntimeLLMConfig):
         self.config = config
         if not config.api_key:
-            raise LLMConfigurationError("后端尚未配置 DASHSCOPE_API_KEY")
+            raise LLMConfigurationError("后端尚未配置模型 API Key，请在 AI 配置中保存或设置 DASHSCOPE_API_KEY / LLM_API_KEY")
 
     async def stream(self, messages: list[dict]) -> AsyncIterator[str]:
-        payload = {
-            "model": self.config.model,
-            "messages": messages,
-            "stream": True,
-            "stream_options": {"include_usage": True},
-            "temperature": 0.3,
-        }
-        headers = {"Authorization": f"Bearer {self.config.api_key}", "Content-Type": "application/json"}
         timeout = httpx.Timeout(settings.llm_timeout_seconds, connect=15)
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            async with client.stream("POST", f"{self.config.base_url}/chat/completions", json=payload, headers=headers) as response:
-                if response.status_code >= 400:
-                    detail = (await response.aread()).decode("utf-8", errors="replace")[:500]
-                    raise RuntimeError(f"模型服务返回 {response.status_code}: {detail}")
-                async for line in response.aiter_lines():
-                    if not line.startswith("data: "):
-                        continue
-                    data = line[6:]
-                    if data == "[DONE]":
-                        break
-                    chunk = json.loads(data)
-                    choices = chunk.get("choices") or []
-                    if choices:
-                        content = choices[0].get("delta", {}).get("content")
-                        if content:
-                            yield content
+        # Scope both clients to the stream, including cancellation and errors.
+        with httpx.Client(timeout=timeout) as sync_client:
+            async with httpx.AsyncClient(timeout=timeout) as async_client:
+                model = ChatOpenAI(
+                    model=self.config.model,
+                    api_key=self.config.api_key,
+                    base_url=self.config.base_url,
+                    temperature=0.3,
+                    timeout=timeout,
+                    max_retries=0,
+                    stream_usage=True,
+                    use_responses_api=False,
+                    http_client=sync_client,
+                    http_async_client=async_client,
+                )
+                async with aclosing(model.astream(messages)) as chunks:
+                    async for chunk in chunks:
+                        # Ignore usage-only, reasoning and tool-call chunks.
+                        text = chunk.text
+                        if text:
+                            yield text
