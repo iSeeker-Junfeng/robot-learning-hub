@@ -8,7 +8,7 @@
 - `backend/`：独立 FastAPI 服务，负责知识检索、提示词组装、模型调用与 SQLite 数据访问。
 - `frontend/app/lab/robot-simulator/`：通用 URDF 机器人仿真实验室，提供运动树、关节控制和 Link 位姿查看。
 - `frontend/content/knowledge.json`：由前端课程数据生成的后端知识快照，避免前后端各维护一份课程内容。
-- 模型服务通过 OpenAI 兼容协议接入，默认使用阿里云百炼 DashScope，也可以替换为其他兼容服务。
+- 模型调用统一由 LangChain `ChatOpenAI` 接管，通过 OpenAI 兼容协议接入，默认使用阿里云百炼 DashScope，也可以替换为其他兼容服务。
 
 ## 本地运行
 
@@ -79,6 +79,19 @@ Docker Compose 会把 SQLite 文件保存在项目的 `data/` 目录，并挂载
 - SQLite 已提供通用学习记录 CRUD，可保存章节进度、资料已读、笔记和问答记录等 JSON 数据。后续接入账号系统时可以把现有浏览器记录迁移到该接口，而不需要调整数据库表结构。
 - AI 对话按章节保存在浏览器中；问题会携带当前章节、路线与学习目标，但不会携带模型密钥。
 - 在 `frontend/` 中运行 `npm run content:export`，即可更新 FastAPI 使用的知识快照；生产构建会自动执行此步骤。
+
+## LangChain 模型调用
+
+调用链：聊天接口 → 知识检索与提示词组装 → `LangChainProvider` → `ChatOpenAI.astream()` → 模型服务。
+
+- `backend/app/llm.py` 是统一调用入口，使用官方 `langchain-openai` 集成包，无需安装完整的 `langchain` 包。
+- 每次请求读取最新运行时配置，沿用 `LLM_BASE_URL`、`LLM_MODEL`、`DASHSCOPE_API_KEY` / `LLM_API_KEY` 及数据库配置优先级。`LLM_PROVIDER` 仍为供应商标识，当前统一走 Chat Completions 兼容协议。
+- 保留系统提示词、聊天历史、章节上下文，以及前端 `meta / sources / delta / done / error` SSE 事件。
+- 使用异步流式调用，仅转发正文；用量信息和非正文片段不会进入回答。超时沿用 `LLM_TIMEOUT_SECONDS`（连接超时 15 秒），不自动重试。
+- DashScope 默认配置不变。其他服务需提供兼容的 Chat Completions 地址；供应商专有推理字段与原生协议不在本次适配范围内。
+- 升级后重新执行 `pip install -e ".[dev]"`（在 `backend/` 下），或重新构建后端 Docker 镜像。
+
+参考：[LangChain ChatOpenAI 官方文档](https://docs.langchain.com/oss/python/integrations/chat/openai)。
 
 ## AI API
 
