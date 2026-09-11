@@ -5,6 +5,7 @@ import logging
 import hmac
 import uuid
 from collections.abc import AsyncIterator
+from contextlib import aclosing
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,7 @@ from fastapi.responses import StreamingResponse
 
 from .config import settings
 from .knowledge import get_knowledge_base
-from .llm import LLMConfigurationError, OpenAICompatibleProvider
+from .llm import LLMConfigurationError, LangChainProvider
 from .schemas import ChatRequest, FeedbackRequest, LearningRecordCreate, LearningRecordUpdate, LLMSettingsUpdate
 from .storage import StorageError, storage
 from .routers.robot_models import router as robot_models_router
@@ -128,9 +129,10 @@ async def chat_stream(request: ChatRequest) -> StreamingResponse:
                 if request.context.selected_text:
                     user_context += f"学习者选中的内容：{request.context.selected_text}\n"
             messages.append({"role": "user", "content": f"{user_context}问题：{request.question}"})
-            provider = OpenAICompatibleProvider(llm_config)
-            async for token in provider.stream(messages):
-                yield event("delta", {"content": token})
+            provider = LangChainProvider(llm_config)
+            async with aclosing(provider.stream(messages)) as tokens:
+                async for token in tokens:
+                    yield event("delta", {"content": token})
             yield event("done", {"conversation_id": conversation_id})
         except LLMConfigurationError as exc:
             yield event("error", {"code": "model_not_configured", "message": str(exc)})
